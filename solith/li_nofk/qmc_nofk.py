@@ -1,6 +1,7 @@
 import numpy as np
 
-def nofk_all_twists(df0,sel,kmag_cond=None,nkm_cond=None):                      
+def nofk_all_twists(df0,sel,obs='nofk'
+    ,kmag_cond=None,nkm_cond=None):                      
   """ collect momentum distribution data from all twists                        
   Args:                                                                         
     df (pd.DataFrame): dataframe containing ['kvecs','nkm','nke']               
@@ -15,12 +16,13 @@ def nofk_all_twists(df0,sel,kmag_cond=None,nkm_cond=None):
                                                                                 
   df = df0.loc[sel]                                                             
   ntwist = len(df)  # !!!! assume df contains all twists from a single run      
+  cols = ['kvecs',obs+'_mean',obs+'_error']
                                                                                 
   kvecl = []                                                                    
   nkml  = []                                                                    
   nkel  = []                                                                    
   for itwist in range(ntwist):                                                  
-    kvecs,nkm,nke = df.iloc[itwist][['kvecs','nkm','nke']].values               
+    kvecs,nkm,nke = df.iloc[itwist][cols].values               
                                                                                 
     # select k vectors                                                          
     ksel = np.ones(len(nkm),dtype=bool)                                         
