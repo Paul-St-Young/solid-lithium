@@ -6,21 +6,43 @@ from qharv.plantation import sugar
 heg_kfermi = lambda rs:((9*np.pi)/(4.*rs**3.))**(1./3)
 
 
-def unfold_inv(kvecs,nkm,nke):
+def unfold_inv(kvecs, nkm, nke):
   """ unfold inversion symmetry of n(k) data
+
   Args:
     kvecs (np.array): k vectors
     nkm   (np.array): n(k) mean
     nke   (np.array): n(k) error
   Return:
-    tuple: (kvecs1,nkm1,nke1) unfolded data
+    tuple: (kvecs1, nkm1, nke1) unfolded data
   """
-  kvecs1 = np.concatenate([kvecs,-kvecs],axis=0)                                
-  nkm1 = np.concatenate([nkm]*2,axis=0)                                         
-  nke1 = np.concatenate([nke]*2,axis=0)                                         
-                                                                                
-  return kvecs1,nkm1,nke1
+
+  kvecs1 = np.concatenate([kvecs,-kvecs], axis=0)
+  nkm1 = np.concatenate([nkm]*2, axis=0)
+  nke1 = np.concatenate([nke]*2, axis=0)
+
+  return kvecs1, nkm1, nke1
 # end def unfold_inv
+
+
+def get_nofk(fjson):
+  """ convenience function for extracting all n(k) data from fjson
+
+  combine solith.li_nofk.qmc_nofk.nofk_all_twists with unfolded_inv
+
+  Args:
+    fjson (str): JSON file holding n(k) data
+  Return:
+    tuple: (kvecs, nkm, nke) momentum distribution with unfolded inv. symm.
+  """
+  from solith.li_nofk.qmc_nofk import nofk_all_twists
+  import pandas as pd
+  df = pd.read_json(fjson)
+  sel = np.ones(len(df), dtype=bool)
+  kvecs0, nkm0, nke0 = nofk_all_twists(df, sel)
+  kvecs, nkm, nke = unfold_inv(kvecs0, nkm0, nke0)
+  return kvecs, nkm, nke
+# end def get_nofk
 
 
 @sugar.check_file_before
