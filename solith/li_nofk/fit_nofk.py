@@ -71,3 +71,10 @@ def load_bspline(fyaml):
   tck = (knots, coeffs, order)
   return tck
 # end def load_bspline
+
+
+def step1d(kmags, kf, jump):
+  stepy = np.zeros(len(kmags))
+  sel = kmags < kf
+  stepy[sel] = jump
+  return stepy
