@@ -1,3 +1,4 @@
+import yaml
 import numpy as np
 from qharv.plantation import sugar
 
@@ -35,7 +36,6 @@ def save_bspline(fyaml, tck):
     fyaml (str): filename to store yaml entry
     tck (tuple): length-3 tuple storing (knots, coeffs, order)
   """
-  import yaml
   knots, coeffs, order = tck
   entry = {
     'knots':knots.tolist()
@@ -61,7 +61,6 @@ def load_bspline(fyaml):
   Return
     tuple: length-3 tuple storing (knots, coeffs, order)
   """
-  import yaml
   with open(fyaml,'r') as f:
     entry = yaml.load(f)
   knots  = np.array(entry['knots'])
@@ -78,3 +77,45 @@ def step1d(kmags, kf, jump):
   sel = kmags < kf
   stepy[sel] = jump
   return stepy
+
+
+@sugar.check_file_before
+def save_iso_fit(nk_yml, kf, jump, tck):
+  """ save isotropic fit to n(k)
+  n(k) = jump * step1d(k-kf) + splev(k, tck)
+
+  Args:
+    nk_yml (str): yaml file to store fit
+    kf (float): magnitude of Fermi k vector
+    jump (float): renormalization factor at kf
+    tck (tuple): (knots, coefficient, order) accepted by scipy.interpolate.spl
+  """
+
+  save_bspline(nk_yml, tck)
+  with open(nk_yml, 'r') as f:
+    entry = yaml.load(f)
+    entry['kf'] = kf
+    entry['jump'] = jump
+
+  with open(nk_yml, 'w') as f:
+    yaml.dump(entry, f)
+
+
+def load_iso_fit(nk_yml):
+  """ load isotropic fit to n(k)
+  n(k) = jump * step1d(k-kf) + splev(k, tck)
+
+  nk_yml must have [kf, jump, knots, coeffs, order]
+
+  Args:
+    nk_yml (str): yaml file dumped by save_iso_fit
+  Return:
+    tuple: (kf, jump, tck)
+  """
+
+  tck = load_bspline(nk_yml)
+  with open(nk_yml, 'r') as f:
+    entry = yaml.load(f)
+    kf = entry['kf']
+    jump = entry['jump']
+  return kf, jump, tck
