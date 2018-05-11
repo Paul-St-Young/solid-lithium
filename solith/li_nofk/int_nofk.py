@@ -25,6 +25,20 @@ def jp_free(karr, kf):
   return jp0
 
 
+def pvec_slice(pvec, kvecs, nkm, eps):
+  """ get a 2D slice of 3D n(k) near plane perpendicular to pvec
+  Args:
+    pvec (np.array): vector defining cutting plane
+    eps (float): include all points with distance < eps from plane
+  Return:
+    np.array: sel, boolean selector array to pass into kvecs
+  """
+  pmag  = np.linalg.norm(pvec)
+  kproj = np.dot(kvecs, pvec)/pmag
+  ksel  = np.absolute(kproj-pmag) < eps
+  return ksel
+
+
 def compton_sum(pvec, kvecs, nkm, eps=5e-2):
   """ perform Compton integral without normalization
   cint(p) = \int d\vec{k} \delta(p-\vec{k}\cdot\hat{p}) n(\vec{k})
@@ -53,9 +67,7 @@ def compton_sum(pvec, kvecs, nkm, eps=5e-2):
   """
 
   # impose delta function to select a 2D slice of n(k)
-  pmag  = np.linalg.norm(pvec)
-  kproj = np.dot(kvecs, pvec)/pmag
-  ksel  = np.absolute(kproj-pmag) < eps
+  ksel = pvec_slice(pvec, kvecs, nkm, eps)
 
   # integrate 2D slice
   nkvals = nkm[ksel]
