@@ -169,3 +169,13 @@ def hex2d(kxy, kf):
   sel = proj > kf
   myz[sel] = 0
   return myz
+
+
+def disk2d(kxy, kf):
+  """ 2D step function with cylindrical symmetry """
+  kx, ky = kxy
+  k = np.sqrt(kx*kx+ky*ky)
+  z = np.ones(kx.shape)
+  sel = k>kf
+  z[sel]=0
+  return z
