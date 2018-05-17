@@ -169,6 +169,8 @@ def hex2d(kxy, kf):
   sel = proj > kf
   myz[sel] = 0
   return myz
+def hex_area(kf):
+  return np.pi*kf**2
 
 
 def disk2d(kxy, kf):
@@ -179,3 +181,5 @@ def disk2d(kxy, kf):
   sel = k>kf
   z[sel]=0
   return z
+def disk_area(kf):
+  return 8*kf**2*np.tan(np.pi/8)
