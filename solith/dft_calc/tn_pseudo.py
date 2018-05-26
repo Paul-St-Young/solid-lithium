@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def read_tags_and_datablocks(fname):
+def read_tags_and_datablocks(text):
   """ read a file consisting of blocks of numbers which are
   separated by tag lines. separate tag lines from data lines
   return two lists
@@ -27,22 +27,23 @@ R(i) in atomic units
    ['14 4.00', ...
 
   Args:
-    fname (str): filename
+    text (str): file content
   Return:
     tuple: (tags, blocks), both are a list of strings
   """
+  lines = text.split('\n')
   tags = []
   blocks = []
-  with open(fname, 'r') as f:
-    block = ''
-    for line in f:
-      try:
-        map(float, line.split())
-        block += line
-      except:
-        tags.append(line)
-        blocks.append(block)
-        block = ''
+
+  block = ''
+  for line in lines:
+    try:
+      map(float, line.split())
+      block += line
+    except:
+      tags.append(line)
+      blocks.append(block)
+      block = ''
   blocks.append(block)
   return tags, blocks[1:]
 
@@ -56,7 +57,8 @@ def parse_pp_data(pp_data):
     tuple: (grid, potl) grid is the radial grid, potl is a list of
      r*Vloc
   """
-  entryl, blockl = read_tags_and_datablocks(pp_data)
+  with open(pp_data, 'r') as f:
+    entryl, blockl = read_tags_and_datablocks(f.read())
   potl = []
   for label, block in zip(entryl, blockl):
     if label.startswith('R(i)'):
@@ -76,7 +78,8 @@ def parse_awfn_data(awfn_data):
     tuple: (grid, orbl) grid is the radial grid, orbl is a list of
      orbitals
   """
-  entryl, blockl = read_tags_and_datablocks(awfn_data)
+  with open(awfn_data, 'r') as f:
+    entryl, blockl = read_tags_and_datablocks(f.read())
   orbl = []
   for label, line in zip(entryl, blockl):
     if label.startswith('Radial grid'):
@@ -122,26 +125,18 @@ def parse_upf(pp_upf):
     unlocl.append(unloc.tolist())
 
   node = doc.find('.//PP_PSWFC')
-  lines = node.text.split('\n')
-  data = []
-  entryl = []
-  block = ''
-  for line in lines:
-    try:
-      map(float, line.split())
-      block += line
-    except:
-      entryl.append(line)
-      data.append(block)
-      block = ''
-  data.append(block)
-  mat = np.array([map(float, line.split()) for line in data[1:]], dtype=float)
+  tags, data = read_tags_and_datablocks(node.text)
+  mat = np.array([map(float, line.split()) for line in data], dtype=float)
+
+  node = doc.find('.//PP_RHOATOM')
+  mat1 = np.array(' '.join(node.text.split('\n')).split(), dtype=float)
 
   info_dict = {
     'grid': ugrid.tolist(),
     'vloc': uloc.tolist(),
     'vnl_list': unlocl,
-    'pp_pswfc_meta': entryl,
-    'pp_pswfc': mat.tolist()
+    'pp_pswfc_meta': tags,
+    'pp_pswfc': mat.tolist(),
+    'rhoatom': mat1.tolist()
   }
   return info_dict
