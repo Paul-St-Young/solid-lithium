@@ -108,7 +108,7 @@ def compton_profile(pvecs, fnk, blat, nx=64, **kwargs):
   """
   # define integration grid
   import chiesa_correction as chc
-  kgrid = chc.remove_com( blat/nx*chc.cubic_pos(nx) )
+  kgrid = chc.remove_com(blat/nx*chc.cubic_pos(nx))
 
   # sample momentum distribution on grid
   nkm = fnk(kgrid)
@@ -117,3 +117,28 @@ def compton_profile(pvecs, fnk, blat, nx=64, **kwargs):
   jp = np.array([compton_sum(pvec, kgrid, nkm, **kwargs) for pvec in pvecs])
   intnorm = 1./(2*np.pi)**3 * blat**2
   return intnorm*jp
+
+
+def get_kxy(kvecs1, direction='100'):
+  """ map 3D kvectors on to 2D kvectors for the given direction
+
+  !!!! assume kvecs1 lie on the same plane along direction
+
+  Args:
+    kvecs1 (np.array): 3D k vectors
+    direction (str): one of '100', '110', '111'
+  Return:
+    kxy (np.array): kx, ky = kxy.T
+  """
+  if direction == '100':
+    # x-y mapping along [100] direction
+    kxy = np.zeros([len(kvecs1), 2])
+    kxy[:, 0] = -kvecs1[:, 2]
+    kxy[:, 1] = kvecs1[:, 1]
+  elif direction == '110':
+    kxy = np.zeros([len(kvecs1), 2])
+    kxy[:, 0] = -kvecs1[:, 2]
+    kxy[:, 1] = -kvecs1[:, 0]/np.sqrt(2)+kvecs1[:, 1]/np.sqrt(2)
+  else:
+    raise NotImplementedError()
+  return kxy
