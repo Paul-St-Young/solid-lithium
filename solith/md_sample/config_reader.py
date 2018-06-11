@@ -66,3 +66,29 @@ def parse_box_ppp(mm):
   # end for
   axes = np.diag(alatl)
   return {'axes':axes}
+
+
+def text_lithium_config(alat, pos):
+  natom = len(pos)
+
+  atom_text = ''
+  for iatom in xrange(natom):
+    r = pos[iatom]
+    line = '%6d %3d %10.6f %10.6f %10.6f\n' % (
+      iatom+1, 1, r[0], r[1], r[2]
+    )
+    atom_text += line
+  # end for
+
+  inp_text = '''Position data for b.c.c. Lithium
+  {natom:d} atoms
+  1  atom types
+  {xmin:10.6f}  {xmax:10.6f} xlo xhi
+  {xmin:10.6f}  {xmax:10.6f} ylo yhi
+  {xmin:10.6f}  {xmax:10.6f} zlo zhi
+
+  Atoms
+  '''.format(natom=natom, xmin=0, xmax=alat)
+
+  inp_text += '\n' + atom_text
+  return inp_text
