@@ -142,3 +142,10 @@ def get_kxy(kvecs1, direction='100'):
   else:
     raise NotImplementedError()
   return kxy
+
+
+def interpolate(kxy, nkm, finex, finey):
+  from scipy.interpolate import griddata
+  finexy = [[(x, y) for y in finey] for x in finex]
+  finez = griddata(kxy, nkm, finexy, fill_value=0.0)
+  return finez
