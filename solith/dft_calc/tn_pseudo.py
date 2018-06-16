@@ -140,3 +140,10 @@ def parse_upf(pp_upf):
     'rhoatom': mat1.tolist()
   }
   return info_dict
+
+
+def parse_pp_dat(pp_dat):
+  data = np.loadtxt(pp_dat)
+  grid = data[:, 0]
+  vmat = data[:, 1:]
+  return grid, vmat.T
