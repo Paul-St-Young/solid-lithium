@@ -90,21 +90,26 @@ def parse_awfn_data(awfn_data):
   return rgrid, orbl
 
 
-def parse_upf(pp_upf):
-  """ parse UPF pseudopotential file
-  return parse data in a dictionary
-
-  Args:
-    pp_upf (str): upf filename
-  Return:
-    dict: a dictionary of parsed data
-  """
+def get_xml_doc(pp_upf):
   from qharv.seed import xml
   # parse like xml file
   with open(pp_upf, 'r') as f:
     body = f.read()
   text_xml = '<root>' + body + '</root>'
   doc = xml.parse(text_xml)
+  return doc
+
+
+def parse_upf(pp_upf):
+  """ parse UPF pseudopotential file
+  return parsed data in a dictionary
+
+  Args:
+    pp_upf (str): upf filename
+  Return:
+    dict: a dictionary of parsed data
+  """
+  doc = get_xml_handle(pp_upf)
 
   # read mesh
   node = doc.find('.//PP_R')
