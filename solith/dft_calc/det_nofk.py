@@ -3,15 +3,17 @@ import numpy as np
 from qharv.seed import wf_h5
 from qharv.inspect import axes_pos
 
-def get_momenta_and_weights(fp, ikpt, kmax, efermi, ispin=0):
-  """ record all momenta and psig^2 for k<kmax and e<efermi
+def get_momenta_and_weights(fp, ispin, ikpt, kmax, ecore, efermi):
+  """ Histogram psig^2 for a single determinant of Kohn-Sham orbitals at a
+  single twist. Select states with momenta k<kmax and energy ecore<e<efermi.
 
   Args:
     fp (h5py.File): pwscf.pwscf.h5 file pointer
+    ispin (int): determinant index (0: unpolarized, 0/1: polarized)
     ikpt (int): twist vector index
     kmax (float): maximum momentum to record
+    ecore (float): Core state energy bound. States below ecore are excluded
     efermi (float): Fermi energy
-    ispin (int, optional): determinant index, default 0
   Return:
     (np.array, np.array): (momenta, weights)
   """
@@ -35,10 +37,10 @@ def get_momenta_and_weights(fp, ikpt, kmax, efermi, ispin=0):
 
   # accumulate occupation
   weights = np.zeros(len(momenta))
-  # keep states below the Fermi level
+  # keep states below the Fermi level and outside the core
   nstate = fp[os.path.join(kpath, 'spin_%d'%ispin, 'number_of_states')].value[0]
   evals = fp[os.path.join(kpath, 'spin_%d'%ispin, 'eigenvalues')].value
-  esel = evals < efermi
+  esel = (evals>ecore) & (evals<efermi)
   states = np.arange(nstate)
   for istate in states[esel]:
     psig = wf_h5.get_orb_in_pw(fp, ikpt, ispin, istate)
@@ -49,7 +51,7 @@ def get_momenta_and_weights(fp, ikpt, kmax, efermi, ispin=0):
   return momenta, weights
 
 
-def get_momentum_distribution(fp, kmax, efermi):
+def get_momentum_distribution(fp, kmax, efermi, ispin=0, ecore=-np.inf):
   """ obtain momentum distribution from Kohn-Sham determinant stored 
   in QMCPACK wf.h5 file format
 
@@ -64,7 +66,8 @@ def get_momentum_distribution(fp, kmax, efermi):
   mlist = []
   wlist = []
   for ikpt in range(nkpt):
-    momenta, weights = get_momenta_and_weights(fp, ikpt, kmax, efermi)
+    momenta, weights = get_momenta_and_weights(fp, ispin, ikpt, kmax,
+      ecore, efermi)
     mlist += momenta.tolist()
     wlist += weights.tolist()
   # end for ikpt
