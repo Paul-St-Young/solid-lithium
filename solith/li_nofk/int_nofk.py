@@ -1,5 +1,26 @@
 import numpy as np
 
+# ================= 1D =================
+
+
+def jp1d(pmag, kmags, nkm, rs):
+  """ compute one point on the Compton profile J(p) using 1D n(k)
+
+  Args:
+    pmag (float): momentum value p in J(p)
+    kmags (np.array): momentum magnitudes where n(k) is available
+    nkm (np.array): n(k) mean (no error)
+    rs (float): electron density measured by Wigner-Seitz radius
+  Return:
+    float: J(p)
+  """
+  from solith.li_nofk.fit_nofk import heg_kfermi
+  kf = heg_kfermi(rs)
+  norm = 3./(4*kf**3)
+  sel = kmags>pmag
+  intval = np.trapz(nkm[sel]*kmags[sel], x=kmags[sel])
+  return intval*norm
+
 
 def jp_free(karr, kf):
   """ Compton profile of the non-interacting Fermi gas
@@ -23,6 +44,9 @@ def jp_free(karr, kf):
   sel = karr < kf
   jp0[sel] = norm*(kf**2-karr[sel]**2)
   return jp0
+
+
+# ================= 2D =================
 
 
 def pvec_slice(pvec, kvecs, nkm, eps):
