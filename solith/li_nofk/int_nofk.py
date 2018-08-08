@@ -173,3 +173,23 @@ def interpolate(kxy, nkm, finex, finey):
   finexy = [[(x, y) for y in finey] for x in finex]
   finez = griddata(kxy, nkm, finexy, fill_value=0.0)
   return finez
+
+# ================= 3D =================
+from qharv.plantation import sugar
+@sugar.skip_exist_file
+def save_nk3d(fh5, kvecs, nkm):
+  from qharv.reel.config_h5 import saveh5
+  data = np.zeros([len(nkm), 4])
+  data[:, :3] = kvecs
+  data[:,  3] = nkm
+  saveh5(fh5, data)
+
+def load_nk3d(fh5, name):
+  import h5py
+  fp = h5py.File(fh5, 'r')
+  data = fp[name].value
+  fp.close()
+
+  kvecs = data[:, :3]
+  nkm = data[:, 3]
+  return kvecs, nkm
