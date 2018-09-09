@@ -49,7 +49,7 @@ def jp_free(karr, kf):
 # ================= 2D =================
 
 
-def pvec_slice(pvec, kvecs, nkm, eps):
+def pvec_slice(pvec, kvecs, eps):
   """ get a 2D slice of 3D n(k) near plane perpendicular to pvec
   Args:
     pvec (np.array): vector defining cutting plane
