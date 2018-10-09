@@ -38,3 +38,17 @@ def elorentz(x, gamma, a1, a2):
     np.sqrt(a1+np.sqrt(delta)) - np.sqrt(a1-np.sqrt(delta))
   )
   return 1./deno/norm
+
+def fft_convolve(f, g, pp):
+  """ convolve two functions f and g on a discrete grid pp using FFT
+
+  Args:
+    f (function): float->float
+    g (function): float->float
+    pp (np.array): x values
+  Return:
+    np.array: convoluved function f*g sampled on grid pp
+  """
+  ft_fg = np.fft.fft(f(pp))*np.fft.fft(g(pp))
+  norm = (pp.max()-pp.min())/len(pp)
+  return np.fft.fftshift(np.fft.ifft(ft_fg).real)*norm
