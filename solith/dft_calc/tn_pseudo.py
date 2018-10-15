@@ -109,7 +109,7 @@ def parse_upf(pp_upf):
   Return:
     dict: a dictionary of parsed data
   """
-  doc = get_xml_handle(pp_upf)
+  doc = get_xml_doc(pp_upf)
 
   # read mesh
   node = doc.find('.//PP_R')
