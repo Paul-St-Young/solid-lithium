@@ -21,6 +21,13 @@ def jp1d(pmag, kmags, nkm, rs):
   intval = np.trapz(nkm[sel]*kmags[sel], x=kmags[sel])
   return intval*norm
 
+def jp_no_norm(p, uk, unkm):
+  sel = uk>=p
+  return 2*np.pi*np.trapz(uk[sel]*unkm[sel], uk[sel])
+
+def calc_jp1d(uk, unkm):
+  jp = [jp_no_norm(p, uk, unkm) for p in uk]
+  return np.array(jp)
 
 def jp_free(karr, kf):
   """ Compton profile of the non-interacting Fermi gas
