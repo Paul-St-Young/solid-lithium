@@ -1,9 +1,12 @@
-NAME=unfold
 export FC=gfortran
 export CC=gcc
 
 all:
-	f2py -c -m $(NAME) $(NAME).f90
+	for name in det unfold; do \
+		f2py -c -m $$name $$name.f90; \
+	done
 
 clean:
-	rm $(NAME).so
+	for name in det unfold; do \
+		rm $$name.so; \
+	done
