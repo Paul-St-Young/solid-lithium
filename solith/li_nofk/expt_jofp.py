@@ -12,6 +12,7 @@ def continue_clamped(x, y, kind='cubic'):
   """
   from scipy.interpolate import interp1d
   fy = interp1d(x, y, kind=kind)
+
   def fycont(p):
     # set function value to zero beyond interpolation range
     ycont = np.zeros(len(p))
@@ -20,6 +21,25 @@ def continue_clamped(x, y, kind='cubic'):
     ycont[sel] = fy(p[sel])
     return ycont
   return fycont
+
+def flip_and_clamp(x, y):
+  """ flip and glue a 1D function on the positive domain
+  then cubic spline with clamped boundary conditions
+
+  Args:
+    x (np.array): x values
+    y (np.array): y values
+  Return:
+    function: y(x) defined over (-max(x), max(x))
+  """
+  istart = 0
+  if np.isclose(x[0], 0):
+    istart = 1
+  myk = np.concatenate([-x, x[istart:]])
+  myjp = np.concatenate([y, y[istart:]])
+  idx = np.argsort(myk)
+  fy = continue_clamped(myk[idx], myjp[idx])
+  return fy
 
 def lorentz(x, gamma):
   """ Lorentzian function """
