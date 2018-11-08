@@ -22,6 +22,27 @@ def continue_clamped(x, y, kind='cubic'):
     return ycont
   return fycont
 
+def flip_and_glue(x, y, xmult=-1, ymult=1):
+  """ flip and glue a 1D samples
+  the default works for symmetric function sampled on
+  positive domain
+
+  Args:
+    x (np.array): x values
+    y (np.array): y values
+    xmult (float, optional): default -1 for positive domain
+    ymult (float, optional): default 1 for symmetric function
+  Return:
+    (np.array, np.array): (myx, myy) glued samples
+  """
+  istart = 0
+  if np.isclose(x[0], 0):
+    istart = 1
+  myk = np.concatenate([x*xmult, x[istart:]])
+  myjp = np.concatenate([y*ymult, y[istart:]])
+  idx = np.argsort(myk)
+  return myk[idx], myjp[idx]
+
 def flip_and_clamp(x, y):
   """ flip and glue a 1D function on the positive domain
   then cubic spline with clamped boundary conditions
@@ -32,13 +53,8 @@ def flip_and_clamp(x, y):
   Return:
     function: y(x) defined over (-max(x), max(x))
   """
-  istart = 0
-  if np.isclose(x[0], 0):
-    istart = 1
-  myk = np.concatenate([-x, x[istart:]])
-  myjp = np.concatenate([y, y[istart:]])
-  idx = np.argsort(myk)
-  fy = continue_clamped(myk[idx], myjp[idx])
+  myx, myy = flip_and_glue(x, y)
+  fy = continue_clamped(myx, myy)
   return fy
 
 def lorentz(x, gamma):
