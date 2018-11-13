@@ -181,6 +181,27 @@ def interpolate(kxy, nkm, finex, finey):
   finez = griddata(kxy, nkm, finexy, fill_value=0.0)
   return finez
 
+def show_pcmesh(ax, kxy, nkm, kmax, nx):
+  """ Show 2D n(k) on a square (-kmax, kmax) with nx points each dimension
+
+  Args:
+    ax (plt.Axes): matplotlib Axes object
+    kxy (np.array): kvectors of shape (nk, ndim=2)
+    nkm (np.array): n(k) mean values shape (nk,)
+    kmax (float): max k along x
+    nx (int): number of points along x
+  Return:
+    plt.QuadMesh: pcolormesh
+  """
+  # interpolate on meshgrid
+  finex = np.linspace(-kmax, kmax, nx)
+  finey = finex
+  finez = interpolate(kxy, nkm, finex, finey)
+  # show mesh
+  xx, yy = np.meshgrid(finex, finey)
+  qm = ax.pcolormesh(xx, yy, finez.reshape(nx, nx))
+  return qm
+
 # ================= 3D =================
 from qharv.plantation import sugar
 @sugar.skip_exist_file
