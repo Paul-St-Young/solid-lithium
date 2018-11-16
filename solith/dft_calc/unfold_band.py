@@ -86,3 +86,61 @@ def unfold2(gvecs1, nkm1, kmap_out, tgrid0):
   ukvecs0 = (qe_gvecs+.5) % 1 - .5
   gvecs0 = np.around(ukvecs0*tgrid0).astype(int)
   return gvecs0, nkm0
+
+def unfold1(gvecs1, nkm1, nscf_out, pbc):
+  """unfold method 1: apply symmetry operations to unique gvecs
+
+  Args:
+    gvecs1 (np.array): integer vectors in the irreducible BZ
+    nkm1 (np.array): scalar field defined over gvecs1
+    scf_out (str): nscf output containing symmetry matrices
+    pbc (bool): apply periodic boundary condition
+  """
+  # get symops
+  import qe_reader as qer
+  symops = qer.read_sym_ops(nscf_out)
+
+  # make a grid large enough to contain the unfolded n(k)
+  import chiesa_correction as chc
+  gmin, gmax, ng = chc.get_regular_grid_dimensions(gvecs1)
+  rgvecs = chc.get_regular_grid(gmin, gmax, ng, int)
+
+  # unfold
+  rnkm = np.zeros(len(rgvecs))
+  filled = np.zeros(len(rgvecs), dtype=bool)
+  for so in symops:
+    mat = np.array(so['mat'], dtype=int)
+    for ig, gv in enumerate(gvecs1):  # unfold existing data
+      gv1 = np.dot(mat, gv)
+      if pbc:
+        # bring back gvectors outside of rgvecs
+        gv1 = (gv1-gmin) % ng + gmin
+      else:
+        # ignore gvectors outside of rgvecs
+        if (gv1 < gmin).any() or (gv1 > gmax).any(): continue
+      idx3d = gv1-gmin
+      # save new point
+      idx = np.ravel_multi_index(idx3d, ng)
+      if not filled[idx]:
+        rnkm[idx] = nkm1[ig]
+        filled[idx] = True
+  return rgvecs[filled], rnkm[filled]
+
+def compare_scalar_grids(gvecs0, nkm0, gvecs1, nkm1):
+  """Compare two scalar fields sampled on regular grids
+
+  Args:
+    gvecs0 (np.array): first grid, (npt0, ndim)
+    nkm0 (np.array): values, (npt0,)
+    gvecs1 (np.array): second grid, (npt1, ndim), expect npt1<=npt0
+    nkm1 (np.array): values, (npt1,)
+  Return:
+    bool: True if same scalar field
+  """
+  from chiesa_correction import align_gvectors
+  comm0, comm1 = align_gvectors(gvecs0, gvecs1)
+  unique = len(gvecs1[comm1]) == len(gvecs1)  # all unique gvecs are unique
+  xmatch = np.allclose(gvecs0[comm0], gvecs1[comm1])  # gvecs match
+  ymatch = np.allclose(nkm0[comm0], nkm1[comm1])  # nk match before unfold
+  success = unique and xmatch and ymatch
+  return success
