@@ -1,14 +1,15 @@
-subroutine unfold_nofk(gvecs, nkm, nke, mats, vecs, rgvecs, nkm1, nke1, filled, ndim, nk, nkr, ns)
+subroutine unfold_nofk(gvecs, nkm, mats, rgvecs, nkm1, filled, ndim, nk, nkr, ns)
   integer, intent(in) :: gvecs(nk, ndim), rgvecs(nkr, ndim)
-  double precision, intent(in) :: mats(ns, ndim, ndim), vecs(ns, ndim)
-  double precision, intent(in) :: nkm(nk), nke(nk)
-  double precision, intent(out) :: nkm1(nkr), nke1(nkr)
+  double precision, intent(in) :: mats(ns, ndim, ndim)
+  double precision, intent(in) :: nkm(nk)
+  double precision, intent(out) :: nkm1(nkr)
   logical, intent(out) :: filled(nkr)
 
   integer :: gmin(ndim), gmax(ndim), ng(ndim)
   double precision :: dg(ndim)
   integer :: gvec1(ndim), idx3d(ndim)
   integer idx1d
+  logical outside
 
   gmin = minval(rgvecs, dim=1)
   gmax = maxval(rgvecs, dim=1)
@@ -22,12 +23,14 @@ subroutine unfold_nofk(gvecs, nkm, nke, mats, vecs, rgvecs, nkm1, nke1, filled, 
       do j=1,ndim
         gvec1(j) = 0.0
         do i=1,ndim
-          gvec1(j) = gvec1(j) + gvecs(ig, i)*mats(is, i, j)
+          gvec1(j) = gvec1(j) + gvecs(ig, i)*mats(is, j, i)
         enddo
-        gvec1(j) = gvec1(j) + vecs(is, j)
       enddo
-      ! bring gvec1 onto rgvecs grid
-      gvec1 = modulo(gvec1-gmin, ng) + gmin
+      outside = .false.
+      do i=1,ndim
+        if ((gvec1(j).lt.gmin(j)).or.(gvec1(j).gt.gmax(j))) outside=.true.
+      enddo
+      if (outside) cycle
 
       idx3d = gvec1-gmin
       idx1d = idx3d(3) + idx3d(2)*ng(3) + idx3d(1)*ng(3)*ng(2) + 1
@@ -35,7 +38,6 @@ subroutine unfold_nofk(gvecs, nkm, nke, mats, vecs, rgvecs, nkm1, nke1, filled, 
         cycle
       endif
       nkm1(idx1d) = nkm(ig)
-      nke1(idx1d) = nke(ig)
       filled(idx1d) = .true.
     enddo
   enddo
