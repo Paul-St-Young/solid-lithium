@@ -142,5 +142,4 @@ def compare_scalar_grids(gvecs0, nkm0, gvecs1, nkm1):
   unique = len(gvecs1[comm1]) == len(gvecs1)  # all unique gvecs are unique
   xmatch = np.allclose(gvecs0[comm0], gvecs1[comm1])  # gvecs match
   ymatch = np.allclose(nkm0[comm0], nkm1[comm1])  # nk match before unfold
-  success = unique and xmatch and ymatch
-  return success
+  return np.array([unique, xmatch, ymatch], dtype=bool)
