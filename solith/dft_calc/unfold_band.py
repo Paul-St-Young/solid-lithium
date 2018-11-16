@@ -126,7 +126,7 @@ def unfold1(gvecs1, nkm1, nscf_out, pbc):
         filled[idx] = True
   return rgvecs[filled], rnkm[filled]
 
-def compare_scalar_grids(gvecs0, nkm0, gvecs1, nkm1):
+def compare_scalar_grids(gvecs0, nkm0, gvecs1, nkm1, atol=1e-6):
   """Compare two scalar fields sampled on regular grids
 
   Args:
@@ -140,6 +140,8 @@ def compare_scalar_grids(gvecs0, nkm0, gvecs1, nkm1):
   from chiesa_correction import align_gvectors
   comm0, comm1 = align_gvectors(gvecs0, gvecs1)
   unique = len(gvecs1[comm1]) == len(gvecs1)  # all unique gvecs are unique
-  xmatch = np.allclose(gvecs0[comm0], gvecs1[comm1])  # gvecs match
-  ymatch = np.allclose(nkm0[comm0], nkm1[comm1])  # nk match before unfold
+  xmatch = np.allclose(gvecs0[comm0], gvecs1[comm1],
+    atol=atol)  # gvecs match
+  ymatch = np.allclose(nkm0[comm0], nkm1[comm1],
+    atol=atol)  # nk match before unfold
   return np.array([unique, xmatch, ymatch], dtype=bool)
