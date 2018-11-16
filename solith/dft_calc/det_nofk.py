@@ -74,3 +74,49 @@ def get_momentum_distribution(fp, kmax, efermi, ispin=0, ecore=-np.inf):
   kvecs = np.array(mlist)
   nkm = np.array(wlist)
   return kvecs, nkm
+
+def get_det_nk(fp, efermi, ecore=-np.inf, kmax=np.inf, ispin=0):
+  """Calculate momentum distribution from Kohn-Sham determinant
+
+  same as get_momentum_distribution, but faster
+
+  Args:
+    fp (h5py.File): pwscf.pwscf.h5 file pointer
+    efermi (float): Fermi energy
+    ecore (float, optional): core energy, default -np.inf
+    kmax (float, optional): maximum k magnitude to record, default np.inf
+    ispin (int, optiona): default 0
+  Return:
+    (np.array, np.array): (kvecs, nkm), kvectors and n(k) mean (no error)
+  """
+  from solith.li_nofk.forlib.det import nofk
+  # need Kohn-Sham eigenvalues to decide which states to use
+  bands = wf_h5.get_bands(fp, ispin=ispin)
+  nt, nstate = bands.shape
+
+  # need kgrid info: basis (raxes), unshifted (kvecs0), twists (tvecs)
+  axes = wf_h5.get(fp, 'axes')
+  raxes = axes_pos.raxes(axes)
+  gvecs0 = wf_h5.get(fp, 'gvectors')
+  utvecs = wf_h5.get_twists(fp)
+  tvecs = np.dot(utvecs, raxes)
+  kvecs0 = np.dot(gvecs0, raxes)
+
+  # calculate n(k) at each twist
+  kvecsl = []
+  nkml = []
+  for it in range(nt):
+    kvecs = kvecs0 + tvecs[it]  # current twist
+    # histogram orb^2
+    gvecs, cmat = wf_h5.get_cmat(fp, it, ispin, nstate)
+    nocc, npw = cmat.shape
+    weights = nofk(kvecs, cmat, bands[it], kmax, ecore, efermi)
+    # save within a cutoff
+    kmags = np.linalg.norm(kvecs, axis=-1)
+    sel = kmags < kmax
+    kvecsl.append(kvecs[sel])
+    nkml.append(weights[sel])
+
+  kvecs = np.concatenate(kvecsl, axis=0)
+  nkm = np.concatenate(nkml)
+  return kvecs, nkm
