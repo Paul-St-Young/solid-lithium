@@ -181,7 +181,7 @@ def interpolate(kxy, nkm, finex, finey):
   finez = griddata(kxy, nkm, finexy, fill_value=0.0)
   return finez
 
-def show_pcmesh(ax, kxy, nkm, kmax, nx):
+def show_pcmesh(ax, kxy, nkm, kmax, nx, **kwargs):
   """ Show 2D n(k) on a square (-kmax, kmax) with nx points each dimension
 
   Args:
@@ -190,6 +190,7 @@ def show_pcmesh(ax, kxy, nkm, kmax, nx):
     nkm (np.array): n(k) mean values shape (nk,)
     kmax (float): max k along x
     nx (int): number of points along x
+    kwargs (dict, optional): keyword arguments to pcolormesh
   Return:
     plt.QuadMesh: pcolormesh
   """
@@ -199,7 +200,7 @@ def show_pcmesh(ax, kxy, nkm, kmax, nx):
   finez = interpolate(kxy, nkm, finex, finey)
   # show mesh
   xx, yy = np.meshgrid(finex, finey)
-  qm = ax.pcolormesh(xx, yy, finez.reshape(nx, nx))
+  qm = ax.pcolormesh(xx, yy, finez.reshape(nx, nx), **kwargs)
   return qm
 
 # ================= 3D =================
