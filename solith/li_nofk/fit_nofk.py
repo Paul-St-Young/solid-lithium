@@ -18,12 +18,13 @@ def unfold_inv(kvecs, nkm, nke):
   Return:
     tuple: (kvecs1, nkm1, nke1) unfolded data
   """
-
-  kvecs1 = np.concatenate([kvecs,-kvecs], axis=0)
+  # flip and concat
+  kvecs1 = np.concatenate([kvecs, -kvecs], axis=0)
   nkm1 = np.concatenate([nkm]*2, axis=0)
   nke1 = np.concatenate([nke]*2, axis=0)
-
-  return kvecs1, nkm1, nke1
+  # keep unique
+  ukvecs, idx = np.unique(kvecs1, axis=0, return_index=True)
+  return kvecs1[idx], nkm1[idx], nke1[idx]
 # end def unfold_inv
 
 
