@@ -46,11 +46,10 @@ subroutine detsk_from_mij(mij, norb, sk0)
   sk0 = 1.+real(sk_comp)/norb
 end subroutine detsk_from_mij
 
-subroutine calc_detsk(qvecs, raxes, gvecs, cmat,&
+subroutine calc_detsk(qvecs, gvecs, cmat,&
   nq, ndim, npw, norb,&
   sk0)
   integer, intent(in) :: qvecs(nq, ndim), gvecs(npw, ndim)
-  double precision, intent(in) :: raxes(ndim, ndim)
   complex*16, intent(in) :: cmat(norb, npw)
   double precision, intent(out) :: sk0(nq)
 
