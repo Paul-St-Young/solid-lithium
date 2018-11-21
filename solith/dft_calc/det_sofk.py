@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 def write_detsk(h5file, ikpt, fwf, ispin, nsh0, kc):
@@ -44,3 +45,34 @@ def write_detsk(h5file, ikpt, fwf, ispin, nsh0, kc):
     'sk0': sk0
   }
   save_dict(arr_dict, h5file, slab)
+
+def get_kssk(fh5, remove_bragg=False):
+  """Retrieve determinant S(k) from HDF5 archive
+
+  Args:
+    fh5 (str): hdf5 archive
+    remove_bragg (bool, optional): remove Bragg peaks
+  Return:
+    (np.array, np.array, np.array): raxes, gvecs, sk0a
+      reciprocal lattice, integer vectors, twist-resolved S(k)
+  """
+  import h5py
+  fp = h5py.File(fh5)
+  # get kvectors at one twist
+  twist = fp.keys()[0]
+  gpath = os.path.join(twist, 'gvecs')
+  rpath = os.path.join(twist, 'raxes')
+  raxes = fp[rpath].value
+  gvecs = fp[gpath].value
+  # average sk overall twists
+  skl = []
+  sel = np.ones(len(gvecs), dtype=bool)
+  for twist in fp.keys():
+    mpath = os.path.join(twist, 'sk0')
+    sk0 = fp[mpath].value
+    if remove_bragg:
+      sel = sel & (sk0 <= 1.)
+    skl.append(sk0)
+  fp.close()
+  ska = np.array(skl)[:, sel]
+  return raxes, gvecs[sel], ska
