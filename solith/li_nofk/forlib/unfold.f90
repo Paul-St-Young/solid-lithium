@@ -6,7 +6,6 @@ subroutine unfold_nofk(gvecs, nkm, mats, rgvecs, nkm1, filled, ndim, nk, nkr, ns
   logical, intent(out) :: filled(nkr)
 
   integer :: gmin(ndim), gmax(ndim), ng(ndim)
-  double precision :: dg(ndim)
   integer :: gvec1(ndim), idx3d(ndim)
   integer idx1d
   logical outside
