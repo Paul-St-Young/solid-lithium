@@ -90,6 +90,10 @@ def unfold2(gvecs1, nkm1, kmap_out, tgrid0):
 def unfold1(gvecs1, nkm1, nscf_out, pbc):
   """unfold method 1: apply symmetry operations to unique gvecs
 
+  notice, there is no reason to carry nkm1 around
+  todo: unfold kgrid only, one symmetry operation at a time
+   return a list of 1D indices on the regular grid
+
   Args:
     gvecs1 (np.array): integer vectors in the irreducible BZ
     nkm1 (np.array): scalar field defined over gvecs1
