@@ -1,6 +1,6 @@
 subroutine unfold_nofk(gvecs, nkm, mats, rgvecs, nkm1, filled, ndim, nk, nkr, ns)
   integer, intent(in) :: gvecs(nk, ndim), rgvecs(nkr, ndim)
-  double precision, intent(in) :: mats(ns, ndim, ndim)
+  integer, intent(in) :: mats(ns, ndim, ndim)
   double precision, intent(in) :: nkm(nk)
   double precision, intent(out) :: nkm1(nkr)
   logical, intent(out) :: filled(nkr)
