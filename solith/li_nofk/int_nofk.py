@@ -29,6 +29,12 @@ def calc_jp1d(uk, unkm):
   jp = [jp_no_norm(p, uk, unkm) for p in uk]
   return np.array(jp)
 
+def calc_nk1d(up, ujpm):
+  djp = np.diff(ujpm)/np.diff(up)
+  upm = 0.5*(up[1:]+up[:-1])
+  norm = -1./(2*np.pi*upm)
+  return upm, norm*djp
+
 def jp_free(karr, kf):
   """ Compton profile of the non-interacting Fermi gas
   example:
