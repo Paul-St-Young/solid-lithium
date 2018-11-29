@@ -88,3 +88,11 @@ def fft_convolve(f, g, pp):
   ft_fg = np.fft.fft(f(pp))*np.fft.fft(g(pp))
   norm = (pp.max()-pp.min())/len(pp)
   return np.fft.fftshift(np.fft.ifft(ft_fg).real)*norm
+
+def qexp(x, q):
+  if np.isclose(q, 1):
+    return np.exp(x)
+  return (1.+(1.-q)*x)**(1./(1-q))
+
+def qgaussian_nonorm(x, q, beta):
+  return qexp(-x**2/(2*beta**2), q)
