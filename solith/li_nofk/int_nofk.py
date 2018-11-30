@@ -60,6 +60,56 @@ def jp_free(karr, kf):
 
 
 # ================= 2D =================
+def calc_jp2d(kvecs, nkm, direction='100', pmin=0, pmax=2., eps=1e-5, verbose=False):
+  """Calculate Compton profile from 3D n(k) along one direction.
+  !!!! Assume kvecs is a subset of a cubic regular grid.
+
+  Args:
+    kvecs (np.array): (nk, ndim) kgrid for n(k)
+    nkm (np.array): (nk,) 3D n(k)
+    direction (str, optional): one of ['100', '110', '111'], default '100'
+    pmin (float, optional): minimum momentum to calculate J(p)
+    pmax (float, optional): maximum momentum to calculate J(p)
+    eps (float, optional): tolerance for selecting plane, default 1e-5
+    verbose (bool, optional): report progress if true
+  Return:
+    (np.array, np.array): (pmags, jpm), Compton profile
+  """
+  kx = np.unique(kvecs[:, 0])
+  dk = kx[1]-kx[0]
+  if direction == '100':
+    norm = 1.
+    phat = np.array([1., 0, 0])
+  elif direction == '110':
+    norm = 2**0.5
+    phat = np.array([1., 1., 0])/2**0.5
+  elif direction == '111':
+    norm = 3**0.5
+    phat = np.array([1., 1., 1.])/3**0.5
+  else:
+    raise RuntimeError('unknown direction %s' % direction)
+  kpmags = np.einsum('ij,j->i', kvecs, phat)
+  pmags = np.unique(kpmags)
+  psel = (pmin <= pmags) & (pmags <= pmax)
+  upmags = pmags[psel]
+  if verbose:
+    from progressbar import ProgressBar
+    bar = ProgressBar(maxval=len(upmags))
+  jpl = []
+  for ip, pmag in enumerate(upmags):
+    # select plane
+    sel = abs(kpmags-pmag) < eps
+    if not sel.any():
+      raise RuntimeError('failed to select plane %s' % pmag)
+    # integrate plane
+    nsum = nkm[sel].sum()
+    jpl.append(nsum)
+    if verbose:
+      bar.update(ip)
+  jpm = np.array(jpl)
+  # normalize
+  jpm *= dk**2*norm
+  return upmags, jpm
 
 
 def pvec_slice(pvec, kvecs, eps):
