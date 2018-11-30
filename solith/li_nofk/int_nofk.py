@@ -63,6 +63,8 @@ def jp_free(karr, kf):
 def calc_jp2d(kvecs, nkm, direction='100', pmin=0, pmax=2., eps=1e-5, verbose=False):
   """Calculate Compton profile from 3D n(k) along one direction.
   !!!! Assume kvecs is a subset of a cubic regular grid.
+  expect nkm to go from 0 to 2
+  still need to divide by kvol =(2pi)^3/vol in 3D; for valence vol = 4pi rs^3/3
 
   Args:
     kvecs (np.array): (nk, ndim) kgrid for n(k)
