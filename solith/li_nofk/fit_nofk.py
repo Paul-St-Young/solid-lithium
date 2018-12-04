@@ -47,6 +47,24 @@ def get_nofk(fjson):
   return kvecs, nkm, nke
 # end def get_nofk
 
+def get_knk(fh5, ymean='nkm'):
+  import h5py
+  fp = h5py.File(fh5, 'r')
+  kvecs = fp['kvecs'].value
+  nkm = fp[ymean].value
+  fp.close()
+  return kvecs, nkm
+
+def get_knk_tgrid(fh5, ymean='nkm', keys=['tgrid', 'raxes', 'gvecs']):
+  import h5py
+  data = {}
+  fp = h5py.File(fh5, 'r')
+  for key in keys:
+    data[key] = fp[key].value
+  nkm = fp[ymean].value
+  fp.close()
+  kvecs = np.dot(data['gvecs'], data['raxes']/data['tgrid'])
+  return kvecs, nkm, data
 
 # ================= level 1: isotropic fit =================
 
@@ -184,3 +202,12 @@ def disk2d(kxy, kf):
   return z
 def disk_area(kf):
   return 8*kf**2*np.tan(np.pi/8)
+
+
+# ================= level 2: 1D slices =================
+def slice1d(phat, kvecs, eps=1e-6):
+  kp = np.einsum('ij,j->i', kvecs, phat)
+  pmag = np.linalg.norm(phat, axis=-1)
+  kmags = np.linalg.norm(kvecs, axis=-1)
+  sel = abs(kp-kmags*pmag)<eps
+  return sel
