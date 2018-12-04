@@ -55,7 +55,7 @@ def get_knk(fh5, ymean='nkm'):
   fp.close()
   return kvecs, nkm
 
-def get_knk_tgrid(fh5, ymean='nkm', keys=['tgrid', 'raxes', 'gvecs']):
+def get_knk_tgrid(fh5, ymean='nkm', keys=['tgrid', 'raxes', 'gvecs', 'nke']):
   import h5py
   data = {}
   fp = h5py.File(fh5, 'r')
