@@ -87,6 +87,16 @@ def unfold2(gvecs1, nkm1, kmap_out, tgrid0):
   gvecs0 = np.around(ukvecs0*tgrid0).astype(int)
   return gvecs0, nkm0
 
+def get_mats_vecs(symops):
+  mats = []
+  vecs = []
+  for so in symops:
+    mat = np.array(so['mat'], int)
+    vec = np.array(so['vec'], int)
+    mats.append(mat)
+    vecs.append(vec)
+  return np.array(mats), np.array(vecs)
+
 def unfold1(gvecs1, nkm1, nscf_out, pbc):
   """unfold method 1: apply symmetry operations to unique gvecs
 
@@ -129,6 +139,34 @@ def unfold1(gvecs1, nkm1, nscf_out, pbc):
         rnkm[idx] = nkm1[ig]
         filled[idx] = True
   return rgvecs[filled], rnkm[filled]
+
+def unfold_idx(gvecs1, mats, pbc):
+  # make a grid large enough to contain the unfolded n(k)
+  import chiesa_correction as chc
+  gmin, gmax, ng = chc.get_regular_grid_dimensions(gvecs1)
+  rgvecs = chc.get_regular_grid(gmin, gmax, ng, int)
+
+  # unfold
+  npt = np.prod(ng)
+  filled = np.zeros(npt, dtype=bool)
+  ridx = np.ones(npt, dtype=int)
+  for mat in mats:
+    for ig, gv in enumerate(gvecs1):  # unfold existing data
+      gv1 = np.dot(mat, gv)
+      if pbc:
+        # bring back gvectors outside of rgvecs
+        gv1 = (gv1-gmin) % ng + gmin
+      else:
+        # ignore gvectors outside of rgvecs
+        if (gv1 < gmin).any() or (gv1 > gmax).any(): continue
+      idx3d = gv1-gmin
+      # save new point
+      idx = np.ravel_multi_index(idx3d, ng)
+      if not filled[idx]:
+        filled[idx] = True
+        ridx[idx] = ig
+  ridx[~filled] = -1
+  return rgvecs, ridx
 
 def compare_scalar_grids(gvecs0, nkm0, gvecs1, nkm1, atol=1e-6):
   """Compare two scalar fields sampled on regular grids
