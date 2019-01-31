@@ -7,6 +7,33 @@ heg_kfermi = lambda rs:((9*np.pi)/(4.*rs**3.))**(1./3)
 
 # ================= level 0: raw data =================
 
+def get_nofk_h5(fh5):
+  """ extract 3D n(k) stored in h5 file
+
+  expected h5 file format:
+    nofk.h5/twist000
+      kvecs                    Dataset {3470, 3}
+      nke                      Dataset {3470/8192}
+      nkm                      Dataset {3470/8192}
+    nofk.h5/twist001
+      kvecs                    Dataset {3462, 3}
+      nke                      Dataset {3462/8192}
+      nkm                      Dataset {3462/8192}
+
+  Args:
+    fh5 (str): h5 file name
+  Return:
+    (np.array, np.array, np.array): (kvecs, nkm, nke)
+  """
+  from qharv.sieve.scalar_h5 import twist_concat_h5
+  kvecs = twist_concat_h5(fh5, 'kvecs')
+  nkm = twist_concat_h5(fh5, 'nkm')
+  nke = twist_concat_h5(fh5, 'nke')
+  return kvecs, nkm, nke
+
+def get_full_nk(fh5):
+  kvecs, nkm, nke = get_nofk_h5(fh5)
+  return unfold_inv(kvecs, nkm, nke)
 
 def unfold_inv(kvecs, nkm, nke):
   """ unfold inversion symmetry of n(k) data
