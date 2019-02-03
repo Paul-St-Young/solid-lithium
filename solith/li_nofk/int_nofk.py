@@ -60,6 +60,22 @@ def jp_free(karr, kf):
 
 
 # ================= 2D =================
+def get_phat(direction):
+  """Get the unit vector along given direction
+
+  Args:
+    direction (str): Mi
+  """
+  if direction == '100':
+    phat = np.array([1., 0, 0])
+  elif direction == '110':
+    phat = np.array([1., 1., 0])/2**0.5
+  elif direction == '111':
+    phat = np.array([1., 1., 1.])/3**0.5
+  else:
+    raise RuntimeError('unknown direction %s' % direction)
+  return phat
+
 def calc_jp2d(kvecs, nkm, direction='100', pmin=0, pmax=2., eps=1e-5, verbose=False):
   """Calculate Compton profile from 3D n(k) along one direction.
   !!!! Assume kvecs is a subset of a cubic regular grid.
@@ -79,17 +95,7 @@ def calc_jp2d(kvecs, nkm, direction='100', pmin=0, pmax=2., eps=1e-5, verbose=Fa
   """
   kx = np.unique(kvecs[:, 0])
   dk = kx[1]-kx[0]
-  if direction == '100':
-    norm = 1.
-    phat = np.array([1., 0, 0])
-  elif direction == '110':
-    norm = 2**0.5
-    phat = np.array([1., 1., 0])/2**0.5
-  elif direction == '111':
-    norm = 3**0.5
-    phat = np.array([1., 1., 1.])/3**0.5
-  else:
-    raise RuntimeError('unknown direction %s' % direction)
+  phat = get_phat(direction)
   kpmags = np.einsum('ij,j->i', kvecs, phat)
   pmags = np.unique(kpmags)
   psel = (pmin <= pmags) & (pmags <= pmax)
@@ -110,6 +116,14 @@ def calc_jp2d(kvecs, nkm, direction='100', pmin=0, pmax=2., eps=1e-5, verbose=Fa
       bar.update(ip)
   jpm = np.array(jpl)
   # normalize
+  if direction == '100':
+    norm = 1.
+  elif direction == '110':
+    norm = 2**0.5
+  elif direction == '111':
+    norm = 3**0.5
+  else:
+    raise RuntimeError('unknown direction %s' % direction)
   jpm *= dk**2*norm
   return upmags, jpm
 
