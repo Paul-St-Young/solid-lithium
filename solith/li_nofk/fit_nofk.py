@@ -193,6 +193,42 @@ def load_iso_fit(nk_yml):
     jump = entry['jump']
   return kf, jump, tck
 
+# Kulik G function
+# ----
+def rfunc(u):
+  return 1-u*np.arctan(1./u)
+
+def rfunc_der1(u):
+  uinv = 1./u
+  first = 1./(u+uinv)
+  second = np.arctan(uinv)
+  return first - second
+
+def kulikg(x, fineu):
+  Ru = rfunc(fineu)
+  finey = x/np.sqrt(Ru)
+  Ry = rfunc(finey)
+  Ru_prime = rfunc_der1(fineu)
+  term1 = Ru_prime/Ru
+  term2 = fineu/(fineu+finey)
+  term3 = (Ru-Ry)/(fineu-finey)
+  integrand = term1*term2*term3
+  val = np.trapz(integrand, fineu)
+  return val
+
+def eval_kulikg(finek, umin=1e-6, umax=200., nu=4096):
+  """Evaluate Kulik's G function at selected k values
+
+  Args:
+    finek (np.array): 1D array of k values
+  Return:
+    np.array: finey, values of Kulik G function
+  """
+  # grid for 1D integration
+  fineu = np.linspace(umin, umax, nu)
+  finey = [kulikg(x, fineu) for x in finek]
+  return np.array(finey)
+# ----
 
 # ================= level 2: 2D fit =================
 
