@@ -76,6 +76,22 @@ def get_phat(direction):
     raise RuntimeError('unknown direction %s' % direction)
   return phat
 
+def slice2d_sels(phat, kvecs, kmin, kmax, eps=1e-5):
+  if not np.isclose(np.linalg.norm(phat), 1):
+    raise RuntimeError('%s should be a unit vector' % str(phat))
+  # get projected kmags along phat
+  kpmags = np.einsum('ij,j->i', kvecs, phat)
+  # find unique planes within given region
+  pmags = np.unique(kpmags)
+  psel = (kmin <= pmags) & (pmags <= kmax)
+  upmags = pmags[psel]
+  # construct selectors
+  sels = []
+  for pmag in upmags:
+    sel = abs(kpmags-pmag) < eps
+    sels.append(sel)
+  return sels, upmags
+
 def calc_jp2d(kvecs, nkm, direction='100', pmin=0, pmax=2., eps=1e-5, verbose=False):
   """Calculate Compton profile from 3D n(k) along one direction.
   !!!! Assume kvecs is a subset of a cubic regular grid.
