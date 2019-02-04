@@ -228,6 +228,25 @@ def eval_kulikg(finek, umin=1e-6, umax=200., nu=4096):
   fineu = np.linspace(umin, umax, nu)
   finey = [kulikg(x, fineu) for x in finek]
   return np.array(finey)
+
+def nk_near_kf(x, n1, A):
+  arg = abs(1-x)
+  return n1 + A*arg*np.log(arg)
+
+def fit_nk_near_kf(myx, myym, myye, xmin, xmax, ax=None):
+  from solith.li_nofk.fit_nofk import nk_near_kf
+  from scipy.optimize import curve_fit
+  sel = (xmin < myx) & (myx < xmax)
+  popt, pcov = curve_fit(nk_near_kf, myx[sel], myym[sel],
+    sigma=myye[sel], absolute_sigma=True)
+  perr = np.sqrt(np.diag(pcov))
+  if ax is not None:
+    xmargin = 1e-4
+    nx = 128
+    line = ax.plot(myx[sel], myym[sel], 'o', fillstyle='none')
+    finex = np.linspace(xmin+xmargin, xmax-xmargin, nx)
+    ax.plot(finex, nk_near_kf(finex, *popt), c=line[0].get_color())
+  return popt, perr
 # ----
 
 # ================= level 2: 2D fit =================
@@ -272,5 +291,6 @@ def slice1d(phat, kvecs, eps=1e-6):
   kp = np.einsum('ij,j->i', kvecs, phat)
   pmag = np.linalg.norm(phat, axis=-1)
   kmags = np.linalg.norm(kvecs, axis=-1)
-  sel = abs(kp-kmags*pmag)<eps
+  coskp = abs(kp)/(kmags*pmag)
+  sel = abs(coskp-1) < eps
   return sel
