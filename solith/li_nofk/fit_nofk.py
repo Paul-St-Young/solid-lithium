@@ -244,7 +244,7 @@ def fit_nk_near_kf(myx, myym, myye, xmin, xmax, ax=None):
     xmargin = 1e-4
     nx = 128
     line = ax.plot(myx[sel], myym[sel], 'o', fillstyle='none')
-    finex = np.linspace(xmin+xmargin, xmax-xmargin, nx)
+    finex = np.linspace(xmin+xmargin, 1.+xmargin, nx)
     ax.plot(finex, nk_near_kf(finex, *popt), c=line[0].get_color())
   return popt, perr
 # ----
@@ -291,6 +291,5 @@ def slice1d(phat, kvecs, eps=1e-6):
   kp = np.einsum('ij,j->i', kvecs, phat)
   pmag = np.linalg.norm(phat, axis=-1)
   kmags = np.linalg.norm(kvecs, axis=-1)
-  coskp = abs(kp)/(kmags*pmag)
-  sel = abs(coskp-1) < eps
+  sel = abs(kp-kmags*pmag)<eps
   return sel
