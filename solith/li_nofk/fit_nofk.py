@@ -244,7 +244,9 @@ def fit_nk_near_kf(myx, myym, myye, xmin, xmax, ax=None):
     xmargin = 1e-4
     nx = 128
     line = ax.plot(myx[sel], myym[sel], 'o', fillstyle='none')
-    finex = np.linspace(xmin+xmargin, 1.+xmargin, nx)
+    plot_min = min(1-1e-4, xmin+xmargin)
+    plot_max = max(1+1e-4, xmax+xmargin)
+    finex = np.linspace(plot_min, plot_max, nx)
     ax.plot(finex, nk_near_kf(finex, *popt), c=line[0].get_color())
   return popt, perr
 # ----
