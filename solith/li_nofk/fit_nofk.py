@@ -292,6 +292,10 @@ def disk_area(kf):
 def slice1d(phat, kvecs, eps=1e-6):
   kp = np.einsum('ij,j->i', kvecs, phat)
   pmag = np.linalg.norm(phat, axis=-1)
-  kmags = np.linalg.norm(kvecs, axis=-1)
-  sel = abs(kp-kmags*pmag)<eps
+  # projection of kvecs along phat
+  kproj = kp[:, np.newaxis]*phat[np.newaxis, :]/pmag
+  # projection perpendicular to phat
+  kperp = kvecs - kproj
+  kpmags = np.linalg.norm(kperp, axis=-1)
+  sel = abs(kpmags)<eps
   return sel
