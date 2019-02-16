@@ -249,15 +249,20 @@ def get_kxy(kvecs1, direction='100'):
   Return:
     kxy (np.array): kx, ky = kxy.T
   """
+  kx = kvecs1[:, 0]
+  ky = kvecs1[:, 1]
+  kz = kvecs1[:, 2]
+  kxy = np.zeros([len(kvecs1), 2])
   if direction == '100':
     # x-y mapping along [100] direction
-    kxy = np.zeros([len(kvecs1), 2])
-    kxy[:, 0] = -kvecs1[:, 2]
-    kxy[:, 1] = kvecs1[:, 1]
+    kxy[:, 0] = ky
+    kxy[:, 1] = kz
   elif direction == '110':
-    kxy = np.zeros([len(kvecs1), 2])
-    kxy[:, 0] = -kvecs1[:, 2]
-    kxy[:, 1] = -kvecs1[:, 0]/np.sqrt(2)+kvecs1[:, 1]/np.sqrt(2)
+    kxy[:, 0] = (ky-kx)/np.sqrt(2)
+    kxy[:, 1] = kz
+  elif direction == '111':
+    kxy[:, 0] = (kz-kx-ky)/np.sqrt(3)
+    kxy[:, 1] =  (ky-kx)/np.sqrt(2)
   else:
     raise NotImplementedError()
   return kxy
