@@ -43,7 +43,7 @@ def flip_and_glue(x, y, xmult=-1, ymult=1):
   idx = np.argsort(myk)
   return myk[idx], myjp[idx]
 
-def flip_and_clamp(x, y):
+def flip_and_clamp(x, y, kind='cubic'):
   """ flip and glue a 1D function on the positive domain
   then cubic spline with clamped boundary conditions
 
@@ -54,7 +54,7 @@ def flip_and_clamp(x, y):
     function: y(x) defined over (-max(x), max(x))
   """
   myx, myy = flip_and_glue(x, y)
-  fy = continue_clamped(myx, myy)
+  fy = continue_clamped(myx, myy, kind=kind)
   return fy
 
 def lorentz(x, gamma):
