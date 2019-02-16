@@ -97,7 +97,7 @@ def get_mats_vecs(symops):
     vecs.append(vec)
   return np.array(mats), np.array(vecs)
 
-def unfold1(gvecs1, nkm1, nscf_out, pbc):
+def unfold1(gvecs1, nkm1, nscf_out, pbc, show_progress=True):
   """unfold method 1: apply symmetry operations to unique gvecs
 
   notice, there is no reason to carry nkm1 around
@@ -109,6 +109,7 @@ def unfold1(gvecs1, nkm1, nscf_out, pbc):
     nkm1 (np.array): scalar field defined over gvecs1
     scf_out (str): nscf output containing symmetry matrices
     pbc (bool): apply periodic boundary condition
+    show_progress (bool, optional): show progress bar, default True
   """
   # get symops
   import qe_reader as qer
@@ -122,7 +123,10 @@ def unfold1(gvecs1, nkm1, nscf_out, pbc):
   # unfold
   rnkm = np.zeros(len(rgvecs))
   filled = np.zeros(len(rgvecs), dtype=bool)
-  for so in symops:
+  if show_progress:
+    from progressbar import ProgressBar
+    bar = ProgressBar(maxval=len(symops))
+  for isym, so in enumerate(symops):
     mat = np.array(so['mat'], dtype=int)
     for ig, gv in enumerate(gvecs1):  # unfold existing data
       gv1 = np.dot(mat, gv)
@@ -138,6 +142,7 @@ def unfold1(gvecs1, nkm1, nscf_out, pbc):
       if not filled[idx]:
         rnkm[idx] = nkm1[ig]
         filled[idx] = True
+    bar.update(isym)
   return rgvecs[filled], rnkm[filled]
 
 def unfold_idx(gvecs1, mats, pbc):
