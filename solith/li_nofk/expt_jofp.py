@@ -96,3 +96,26 @@ def qexp(x, q):
 
 def qgaussian_nonorm(x, q, beta):
   return qexp(-x**2/(2*beta**2), q)
+
+def clement_hf_mo():
+  def chi0(r, z, n):
+    """S basis function"""
+    from scipy.misc import factorial
+    y00 = 0.5/np.sqrt(np.pi)  # Ylm l=0, m=0
+    norm = y00/np.sqrt(factorial(2*n))* (2*z)**(n+.5)
+    return norm*r**(n-1)*np.exp(-z*r)
+  def mo(r):
+    z1 = 2.47673
+    z2 = 4.69873
+    c1 = 0.89786
+    c2 = 0.11131
+    return c1*chi0(r, z1, 1) + c2*chi0(r, z2, 1)
+  return mo
+
+def clement_hf_nk(myk, rmin=0, rmax=20, nr=1024*16):
+  from qharv.inspect.grsk import ft_iso3d
+  finer = np.linspace(rmin, rmax, nr)
+  mo = clement_hf_mo()
+  psik = ft_iso3d(myk, finer, mo(finer))
+  norm0 = 245.66/2  # converged norm using default rgrid
+  return psik**2/norm0
