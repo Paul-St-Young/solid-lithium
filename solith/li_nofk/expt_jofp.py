@@ -119,3 +119,6 @@ def clement_hf_nk(myk, rmin=0, rmax=20, nr=1024*16):
   psik = ft_iso3d(myk, finer, mo(finer))
   norm0 = 245.66/2  # converged norm using default rgrid
   return psik**2/norm0
+
+def cubic_average(jp100, jp110, jp111):
+  return 1./35*(10*jp100+16*jp110+9*jp111)
