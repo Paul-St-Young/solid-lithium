@@ -76,16 +76,17 @@ def get_phat(direction):
     raise RuntimeError('unknown direction %s' % direction)
   return phat
 
-def slice2d_sels(phat, kvecs, kmin, kmax, eps=1e-5):
+def slice2d_sels(phat, kvecs, kmin, kmax, ndig=6):
   if not np.isclose(np.linalg.norm(phat), 1):
     raise RuntimeError('%s should be a unit vector' % str(phat))
   # get projected kmags along phat
   kpmags = np.einsum('ij,j->i', kvecs, phat)
   # find unique planes within given region
-  pmags = np.unique(kpmags)
+  pmags = np.unique(kpmags.round(ndig))
   psel = (kmin <= pmags) & (pmags <= kmax)
   upmags = pmags[psel]
   # construct selectors
+  eps = 2*10**(-ndig)
   sels = []
   for pmag in upmags:
     sel = abs(kpmags-pmag) < eps
