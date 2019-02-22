@@ -97,12 +97,6 @@ def li_estimators():
     'type': 'csk',
     'name': 'csk'
   })
-  bins = 256
-  gr_est = etree.Element('estimator', {
-    'type': 'gofr',
-    'name': 'gofr',
-    'num_bin': str(bins)
-  })
   p_est = etree.Element('pressure', {
     'type': 'Pressure'
   })
