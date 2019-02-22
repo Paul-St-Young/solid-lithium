@@ -90,7 +90,8 @@ def li_estimators():
   """ build a list of <estimator> nodes for typical Li calculation """
   mom_est = etree.Element('estimator', {
     'type': 'momentum',
-    'name': 'nofk'
+    'name': 'nofk',
+    'kmax': 2.0
   })
   sk_est = etree.Element('estimator', {
     'type': 'csk',
