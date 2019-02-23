@@ -100,5 +100,5 @@ def li_estimators():
   p_est = etree.Element('pressure', {
     'type': 'Pressure'
   })
-  estl = [mom_est, sk_est, gr_est, p_est]
+  estl = [mom_est, sk_est, p_est]
   return estl
