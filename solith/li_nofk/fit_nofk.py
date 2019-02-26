@@ -77,8 +77,8 @@ def get_nofk(fjson):
 def get_knk(fh5, ymean='nkm'):
   import h5py
   fp = h5py.File(fh5, 'r')
-  kvecs = fp['kvecs'].value
-  nkm = fp[ymean].value
+  kvecs = fp['kvecs'][()]
+  nkm = fp[ymean][()]
   fp.close()
   return kvecs, nkm
 
@@ -87,8 +87,8 @@ def get_knk_tgrid(fh5, ymean='nkm', keys=['tgrid', 'raxes', 'gvecs', 'nke']):
   data = {}
   fp = h5py.File(fh5, 'r')
   for key in keys:
-    data[key] = fp[key].value
-  nkm = fp[ymean].value
+    data[key] = fp[key][()]
+  nkm = fp[ymean][()]
   fp.close()
   kvecs = np.dot(data['gvecs'], data['raxes']/data['tgrid'])
   return kvecs, nkm, data
