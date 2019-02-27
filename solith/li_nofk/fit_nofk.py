@@ -233,11 +233,13 @@ def nk_near_kf(x, n1, A):
   arg = abs(1-x)
   return n1 + A*arg*np.log(arg)
 
-def fit_nk_near_kf(myx, myym, myye, xmin, xmax, ax=None):
-  from solith.li_nofk.fit_nofk import nk_near_kf
+def fit_nk_near_kf(myx, myym, myye, xmin, xmax, func=None, ax=None):
+  if func is None:
+    from solith.li_nofk.fit_nofk import nk_near_kf
+    func = nk_near_kf
   from scipy.optimize import curve_fit
   sel = (xmin < myx) & (myx < xmax)
-  popt, pcov = curve_fit(nk_near_kf, myx[sel], myym[sel],
+  popt, pcov = curve_fit(func, myx[sel], myym[sel],
     sigma=myye[sel], absolute_sigma=True)
   perr = np.sqrt(np.diag(pcov))
   if ax is not None:
@@ -247,7 +249,7 @@ def fit_nk_near_kf(myx, myym, myye, xmin, xmax, ax=None):
     plot_min = min(1-1e-4, xmin+xmargin)
     plot_max = max(1+1e-4, xmax+xmargin)
     finex = np.linspace(plot_min, plot_max, nx)
-    ax.plot(finex, nk_near_kf(finex, *popt), c=line[0].get_color())
+    ax.plot(finex, func(finex, *popt), c=line[0].get_color())
   return popt, perr
 # ----
 
