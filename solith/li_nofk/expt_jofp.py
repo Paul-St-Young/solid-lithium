@@ -122,3 +122,18 @@ def clement_hf_nk(myk, rmin=0, rmax=20, nr=1024*16):
 
 def cubic_average(jp100, jp110, jp111):
   return 1./35*(10*jp100+16*jp110+9*jp111)
+
+def scaled_jp1d(uk, unk, rs, rs1):
+  from solith.li_nofk.sum_rule import kvol3d
+  from solith.li_nofk.fit_nofk import heg_kfermi
+  from solith.li_nofk.int_nofk import calc_jp1d
+  #rs1 = heg_kfermi(kf1)
+  kvol1 = kvol3d(rs1)
+  # scale k
+  kf = heg_kfermi(rs)
+  kf1 = heg_kfermi(rs1)
+  uk1 = uk*kf1/kf
+  # scale J(p)
+  unk1 = unk.copy()
+  ujp1 = calc_jp1d(uk1, unk1)/kvol1
+  return uk1, ujp1
