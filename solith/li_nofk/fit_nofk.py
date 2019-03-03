@@ -35,6 +35,13 @@ def get_full_nk(fh5):
   kvecs, nkm, nke = get_nofk_h5(fh5)
   return unfold_inv(kvecs, nkm, nke)
 
+def get_one_nk3d(iconf, series, stat_dir):
+  from qharv.reel import mole
+  fregex = '*_conf%d*.s%03d.nofk.h5' % (iconf, series)
+  fh5 = mole.find(fregex, stat_dir)
+  kvecs, nkm, nke = get_full_nk(fh5)
+  return kvecs, nkm, nke
+
 def unfold_inv(kvecs, nkm, nke):
   """ unfold inversion symmetry of n(k) data
 
