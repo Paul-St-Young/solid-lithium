@@ -251,6 +251,7 @@ def eval_kulikg(finek, umin=1e-6, umax=200., nu=4096):
   fineu = np.linspace(umin, umax, nu)
   finey = [kulikg(x, fineu) for x in finek]
   return np.array(finey)
+# ----
 
 def nk_near_kf(x, n1, A):
   arg = abs(1-x)
@@ -274,7 +275,20 @@ def fit_nk_near_kf(myx, myym, myye, xmin, xmax, func=None, ax=None):
     finex = np.linspace(plot_min, plot_max, nx)
     ax.plot(finex, func(finex, *popt), c=line[0].get_color())
   return popt, perr
-# ----
+
+def fit_zkf(x, ym, ye,
+  xmin, xleft, xright, xmax, **kwargs):
+  popt1, perr1 = fit_nk_near_kf(x, ym, ye, xmin, xleft, **kwargs)
+  popt2, perr2 = fit_nk_near_kf(x, ym, ye, xright, xmax, **kwargs)
+  nleftm = popt1[0]
+  nlefte = perr1[0]
+  nrightm = popt2[0]
+  nrighte = perr2[0]
+  zkfm = nleftm-nrightm
+  zkfe = (nlefte**2+nrighte**2)**0.5
+  data = {'nleft_mean': nleftm, 'nleft_error': nlefte,
+          'nright_mean': nrightm, 'nright_error': nrighte}
+  return zkfm, zkfe, data
 
 # ================= level 2: 2D fit =================
 
