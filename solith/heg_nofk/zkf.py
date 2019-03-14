@@ -17,7 +17,7 @@ def paola_np(rs):
   nume = q1*rs
   deno = 1+q2*rs**0.5+q3*rs**(7./4)
   return nume/deno
-def paula_zkf(rs):
+def paola_zkf(rs):
   nminus = paola_nm(rs)
   nplus = paola_np(rs)
   return nminus-nplus
