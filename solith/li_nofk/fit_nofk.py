@@ -37,10 +37,26 @@ def get_full_nk(fh5):
 
 def get_one_nk3d(iconf, series, stat_dir):
   from qharv.reel import mole
-  fregex = '*_conf%d*.s%03d.nofk.h5' % (iconf, series)
+  fregex = '*_conf%d_*.s%03d.nofk.h5' % (iconf, series)
   fh5 = mole.find(fregex, stat_dir)
   kvecs, nkm, nke = get_full_nk(fh5)
   return kvecs, nkm, nke
+
+def get_one_nk1d(iconf, series, stat_dir):
+  from static_correlation import shavg
+  kvecs, nkm, nke = get_one_nk3d(iconf, series, stat_dir)
+  uk, unkm, unke = shavg(kvecs, nkm, nke)
+  return uk, unkm, unke
+
+def get_pure_nk1d(iconf, dseries, stat_dir, vseries=0):
+  uk0, unkm0, unke0 = get_one_nk1d(iconf, vseries, stat_dir)
+  uk1, unkm1, unke1 = get_one_nk1d(iconf, dseries, stat_dir)
+  if not np.allclose(uk0, uk1):
+    raise RuntimeError('VMC DMC kgrid mismatch')
+  uk2 = uk1
+  unkm2 = 2*unkm1-unkm0
+  unke2 = (4*unke1**2+unke0**2)**0.5
+  return uk2, unkm2, unke2
 
 def unfold_inv(kvecs, nkm, nke):
   """ unfold inversion symmetry of n(k) data
