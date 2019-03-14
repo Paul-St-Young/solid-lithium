@@ -59,3 +59,6 @@ def get_rpa_delta3d_inf(axes, rs, mxl=[8, 16], alpha=-1.):
   ye = [1e-8]*len(yl)  # fake errors
   y0m, y0e = poly_extrap_to_x0(np.array(mxl)**alpha, yl, ye, 1)
   return y0m, y0e
+# 1-term approximation to rpa_delta3d
+def delta3d_1term(rs, nelec):
+  return 1.21843*(rs/3.)**0.5*(3./(4*np.pi*nelec))**(1./3)
