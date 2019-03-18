@@ -290,6 +290,58 @@ def fit_zkf(x, ym, ye,
           'nright_mean': nrightm, 'nright_error': nrighte}
   return zkfm, zkfe, data
 
+def get_loglog_left(myx0, myym0):
+  # throw out first point (!!!! assume x=0)
+  n0m = myym0[0]
+  myx = myx0[1:]
+  myym = n0m-myym0[1:]
+  sel = (myx < 1.) & (myym > 0)
+  return np.log10(myx[sel]), np.log10(myym[sel]), n0m
+
+def get_loglog_right(myx0, myym0):
+  sel = (myx0 > 1.) & (myym0 > 0)
+  return np.log10(myx0[sel]), np.log10(myym0[sel])
+
+def fit_loglog_oneside(log10x, log10y, xleft, xright, func=None, ax=None):
+  from scipy.optimize import curve_fit
+  if func is None:
+    def linear(x, a, b):
+      return a+b*x
+    func = linear
+  sel = (np.log10(xleft) < log10x) & (log10x < np.log10(xright))
+  myx = log10x[sel]
+  myy = log10y[sel]
+  popt, pcov = curve_fit(func, myx, myy)
+  perr = np.sqrt(np.diag(pcov))
+  if ax is not None:
+    line = ax.plot(myx, myy, 'o', fillstyle='none')
+    xlim_left = min(xleft-.2, 1.0)
+    xlim_right = max(xright+.2, 1.0)
+    finex = np.linspace(np.log10(xlim_left), np.log10(xlim_right), 64)
+    ax.plot(finex, func(finex, *popt), c=line[0].get_color())
+  return popt, perr
+
+def fit_loglog(myx, myym, xmin, xleft, xright, xmax, **kwargs):
+  ax = kwargs.pop('ax', None)
+  x1, y1, n0 = get_loglog_left(myx, myym)
+  x2, y2 = get_loglog_right(myx, myym)
+  if ax is not None:
+    ax.plot(x1, y1, 'x')
+    ax.plot(x2, y2, 'x')
+  lpopt, lperr = fit_loglog_oneside(x1, y1, xmin, xleft, ax=ax)
+  rpopt, rperr = fit_loglog_oneside(x2, y2, xright, xmax, ax=ax)
+  entry = {'lpopt': lpopt, 'lperr': lperr, 'rpopt': rpopt, 'rperr': rperr}
+  # interpret fits
+  lalpha = 10**lpopt[0]
+  lbeta = lpopt[1]
+  ralpha = 10**rpopt[0]
+  rbeta = rpopt[1]
+  entry.update({
+    'lalpha': lalpha, 'lbeta': lbeta, 'n0': n0,
+    'ralpha': ralpha, 'rbeta': rbeta,
+    'nleft': n0-lalpha, 'nright': ralpha, 'zeta': n0-lalpha-ralpha})
+  return entry
+
 # ================= level 2: 2D fit =================
 
 
@@ -320,8 +372,8 @@ def disk2d(kxy, kf):
   kx, ky = kxy
   k = np.sqrt(kx*kx+ky*ky)
   z = np.ones(kx.shape)
-  sel = k>kf
-  z[sel]=0
+  sel = k > kf
+  z[sel] = 0
   return z
 def disk_area(kf):
   return 8*kf**2*np.tan(np.pi/8)
@@ -336,5 +388,5 @@ def slice1d(phat, kvecs, eps=1e-6):
   # projection perpendicular to phat
   kperp = kvecs - kproj
   kpmags = np.linalg.norm(kperp, axis=-1)
-  sel = abs(kpmags)<eps
+  sel = abs(kpmags) < eps
   return sel
