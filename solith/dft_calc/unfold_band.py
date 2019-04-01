@@ -67,25 +67,22 @@ def get_ekmap(scf_out):
   mm.close()
   return emap, kmap
 
-def grid_emap(emap):
-  y = emap.values()
-  ymap = {}
-  for i, yy in enumerate(np.unique(y)):
-    ymap[yy] = i
-  sites = np.zeros(len(y), dtype=int)
-  for xx, yy in emap.items():
-    sites[xx-1] = ymap[yy]
-  return np.array(sites)
+def unfold2(myband, emap, kmap):
+  """unfold method 2: steal equivalence map from QE kpoint_grid.f90
 
-def unfold2(gvecs1, nkm1, kmap_out, tgrid0):
-  import chiesa_correction as chc
-  emap, kmap = get_ekmap(kmap_out)
-  sites = grid_emap(emap)
-  nkm0 = nkm1[sites]
-  qe_gvecs = chc.cubic_pos(tgrid0)/float(tgrid0)
-  ukvecs0 = (qe_gvecs+.5) % 1 - .5
-  gvecs0 = np.around(ukvecs0*tgrid0).astype(int)
-  return gvecs0, nkm0
+  myband MUST be ordered in the same way as the QE irreducible kpoints
+  """
+  # fill existing values
+  idxl = kmap.keys()
+  idxl.sort()
+  nktot = len(emap)
+  vals = np.zeros(nktot)
+  for i, idx in enumerate(idxl):
+    vals[idx-1] = myband[i]
+  # map symmetry points
+  for idx0, idx1 in emap.items():
+    vals[idx0-1] = vals[idx1-1]
+  return vals
 
 def get_mats_vecs(symops):
   mats = []
