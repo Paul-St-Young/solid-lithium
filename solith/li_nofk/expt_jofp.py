@@ -89,6 +89,37 @@ def fft_convolve(f, g, pp):
   norm = (pp.max()-pp.min())/len(pp)
   return np.fft.fftshift(np.fft.ifft(ft_fg).real)*norm
 
+def convolve_nk(myk, nkm, gfunc, klim, nk, kmin=0.02, kmax=1.5):
+  """Convolve n(k) by going to J(p); apply resolution; and back.
+
+  Args:
+    myk (np.array): k
+    nkm (np.array): n(k)
+    gfunc (callable): resolution function
+    klim (float): maxmimum kvalue to include in convolution
+    nk (nk): number of points on linear grid
+    kmin (float, optional): minimum n(k) to keep after conv., default 0.02
+    kmax (float, optional): maximum n(k) to keep after conv., default 1.50
+  Return:
+    (np.array, np.array): (myk1, mynk1), convolved n(k)
+  Example:
+    >>> gfunc = lambda x:lorentz(x, 0.026)
+    >>> klim = 40.  # need large number for lorentzian tail
+    >>> nk = 1024**2
+    >>> myk1, nkm1 = convolve_nk(myk, nkm, gfunc, klim, nk)
+  """
+  from solith.li_nofk.int_nofk import calc_jp1d, calc_nk1d
+  # first integrate n(k) to J(p)
+  jpm = calc_jp1d(myk, nkm)
+  # second convolve J(p)
+  fjp = flip_and_clamp(myk, jpm)
+  finep = np.linspace(-klim, klim, nk)
+  jp1 = fft_convolve(fjp, gfunc, finep)
+  # third differentiate J(p) to n(k)
+  sel = (finep > kmin) & (finep < kmax)
+  myk1, nk1 = calc_nk1d(finep[sel], jp1[sel])
+  return myk1, nk1
+
 def qexp(x, q):
   if np.isclose(q, 1):
     return np.exp(x)
