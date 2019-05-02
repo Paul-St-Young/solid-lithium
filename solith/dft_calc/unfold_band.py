@@ -67,21 +67,40 @@ def get_ekmap(scf_out):
   mm.close()
   return emap, kmap
 
-def unfold2(myband, emap, kmap):
+def unfold2(bands, emap, kmap, axis=0):
   """unfold method 2: steal equivalence map from QE kpoint_grid.f90
 
-  myband MUST be ordered in the same way as the QE irreducible kpoints
+  kpoints in bands MUST be ordered in the same way as the QE irreducible kpts
+
+  Args:
+    bands (np.array): band energy with kpoint (and state) labels
+    emap (dict): int -> int equivalence map of kpoint indices (full -> irrek)
+    kmap (dict): inverse of emap
+    axis (int, optional): kpoint axis, default is 0
+  Return:
+    np.array: unfolded bands
   """
-  # fill existing values
   idxl = kmap.keys()
   idxl.sort()
   nktot = len(emap)
-  vals = np.zeros(nktot)
+  # extend the kpoint axis
+  new_shape = list(bands.shape)
+  new_shape[axis] = nktot
+  vals = np.zeros(new_shape)
+  # fill existing values
   for i, idx in enumerate(idxl):
-    vals[idx-1] = myband[i]
+    if axis == 0:
+      vals[idx-1] = bands[i]
+    elif axis == 1:
+      vals[:, idx-1] = bands[:, i]
+    else:
+      raise RuntimeError('need to implement axis %d (add another :,)' % axis)
   # map symmetry points
   for idx0, idx1 in emap.items():
-    vals[idx0-1] = vals[idx1-1]
+    if axis == 0:
+      vals[idx0-1] = vals[idx1-1]
+    elif axis == 1:
+      vals[:, idx0-1] = vals[:, idx1-1]
   return vals
 
 def get_mats_vecs(symops):
