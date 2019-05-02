@@ -67,6 +67,23 @@ def get_ekmap(scf_out):
   mm.close()
   return emap, kmap
 
+def get_weights(equiv_out):
+  """Get weights of irreducible kpoints.
+
+  Args:
+    equiv_out (str): QE output file
+  Return:
+    np.array: weights, number of equivalent kpoints for each irrek
+  """
+  emap, kmap = get_ekmap(equiv_out)
+  sidxl = kmap.keys()
+  sidxl.sort()
+  weights = []
+  for sidx in sidxl:
+    kwt = len(kmap[sidx])
+    weights.append(kwt)
+  return np.array(weights)
+
 def unfold2(bands, emap, kmap, axis=0):
   """unfold method 2: steal equivalence map from QE kpoint_grid.f90
 
