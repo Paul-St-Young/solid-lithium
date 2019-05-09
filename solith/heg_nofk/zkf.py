@@ -51,6 +51,23 @@ def takada_zkf():
   zkf = np.array([0.870, 0.765, 0.680, 0.604, 0.545])
   return rs, zkf
 
+# Markus Holzmann PRL 107, 110402 (2011)
+def holzmann_zkf(method='bf-rmc'):
+  # Table II
+  rs = np.array([1, 2, 3.99, 5, 10])
+  if method == 'bf-rmc':
+    zkfm = np.array([0.84, 0.77, 0.64, 0.58, 0.40])
+    zkfe = np.array([0.02, 0.01, 0.01, 0.01, 0.01])
+  elif method == 'bf-vmc':
+    zkfm = np.array([0.86, 0.78, 0.65, 0.59, 0.41])
+    zkfe = np.array([0.01, 0.01, 0.01, 0.01, 0.01])
+  elif method == 'sj-vmc':
+    zkfm = np.array([0.894, 0.82, 0.69, 0.61, 0.45])
+    zkfe = np.array([0.009, 0.01, 0.01, 0.02, 0.01])
+  else:
+    raise RuntimeError('unknown method %s' % method)
+  return rs, zkfm, zkfe
+
 # finite-size correction for Zkf
 def rpa_delta3d(k, rs):
   wp = (3./rs**3)**0.5
