@@ -24,6 +24,33 @@ def paola_zkf(rs):
   nplus = paola_np(rs)
   return nminus-nplus
 
+# Yasutami Takada PRB 44, 7879 (1991)
+def takada_nm():
+  # extract from Takada1991 Fig. 2 and 4
+  #rs = np.array([1, 3, 4, 5])
+  #nminus = np.array([0.930,       0.836, 0.783, 0.751])
+  # extract from Paola Fig. 4
+  rs = np.array([1, 2, 3, 4, 5])
+  nminus = np.array([0.930, 0.868, 0.817, 0.772, 0.730])
+  return rs, nminus
+def takada_np():
+  # extract from Takada1991 Fig. 2 and 4
+  #rs = np.array([1, 3, 4, 5])
+  #nplus = np.array([0.055,       0.127, 0.154, 0.179])
+  # extract from Paola Fig. 4
+  rs = np.array([1, 2, 3, 4, 5])
+  nplus = np.array([0.056, 0.101, 0.138, 0.169, 0.197])
+  return rs, nplus
+def takada_zkf():
+  rs, nminus = takada_nm()
+  rs, nplus = takada_np()
+  zkf = nminus-nplus
+  #zkf = np.array([[0.875, 0.709, 0.629, 0.572])
+  # use Paola Fig. 4
+  rs = np.array([1, 2, 3, 4, 5])
+  zkf = np.array([0.870, 0.765, 0.680, 0.604, 0.545])
+  return rs, zkf
+
 # finite-size correction for Zkf
 def rpa_delta3d(k, rs):
   wp = (3./rs**3)**0.5
