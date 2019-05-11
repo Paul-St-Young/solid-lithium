@@ -1,5 +1,5 @@
 # read .cfg file. Extend by:
-#  1. add an item to parse_funs
+#  1. add an item to parse_funcs
 #  2. append a parse function to this script
 import numpy as np
 

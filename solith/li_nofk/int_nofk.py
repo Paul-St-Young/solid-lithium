@@ -189,7 +189,7 @@ def compton_sum(pvec, kvecs, nkm, eps=5e-2):
   """
 
   # impose delta function to select a 2D slice of n(k)
-  ksel = pvec_slice(pvec, kvecs, nkm, eps)
+  ksel = pvec_slice(pvec, kvecs, eps)
 
   # integrate 2D slice
   nkvals = nkm[ksel]
