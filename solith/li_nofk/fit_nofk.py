@@ -284,10 +284,16 @@ def fit_zkf(x, ym, ye,
   nlefte = perr1[0]
   nrightm = popt2[0]
   nrighte = perr2[0]
+  alm = popt1[1]
+  ale = perr1[1]
+  arm = popt2[1]
+  are = perr2[1]
   zkfm = nleftm-nrightm
   zkfe = (nlefte**2+nrighte**2)**0.5
   data = {'nleft_mean': nleftm, 'nleft_error': nlefte,
-          'nright_mean': nrightm, 'nright_error': nrighte}
+          'nright_mean': nrightm, 'nright_error': nrighte,
+          'aleft_mean': alm, 'aleft_error': ale,
+          'aright_mean': arm, 'aright_error': are}
   return zkfm, zkfe, data
 
 def get_loglog_left(myx0, myym0):
