@@ -42,6 +42,15 @@ def get_one_nk3d(iconf, series, stat_dir):
   kvecs, nkm, nke = get_full_nk(fh5)
   return kvecs, nkm, nke
 
+def get_pure_nk3d(iconf, dseries, stat_dir, vseries=0):
+  kvecs0, nkm0, nke0 = get_one_nk3d(iconf, vseries, stat_dir)
+  kvecs1, nkm1, nke1 = get_one_nk3d(iconf, dseries, stat_dir)
+  assert np.allclose(kvecs0, kvecs1)
+  kvecs2 = kvecs1
+  nkm2 = 2*nkm1-nkm0
+  nke2 = (4*nke1**2+nke0**2)**0.5
+  return kvecs2, nkm2, nke2
+
 def get_one_nk1d(iconf, series, stat_dir):
   from static_correlation import shavg
   kvecs, nkm, nke = get_one_nk3d(iconf, series, stat_dir)
