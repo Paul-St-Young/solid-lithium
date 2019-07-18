@@ -23,7 +23,8 @@ def write_detsk(h5file, ikpt, fwf, ispin, nsh0, kc):
 
   # read wf file
   fp = wf_h5.read(fwf)
-  gvecs, cmat = wf_h5.get_cmat(fp, ikpt, ispin)
+  gvecs = wf_h5.get(fp, 'gvectors')
+  cmat = wf_h5.get_cmat(fp, ikpt, ispin)
   wf_h5.normalize_cmat(cmat)
   axes = wf_h5.get(fp, 'axes')
   fp.close()

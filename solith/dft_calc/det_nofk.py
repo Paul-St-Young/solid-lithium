@@ -97,10 +97,10 @@ def get_det_nk(fp, efermi, ecore=-np.inf, kmax=np.inf, ispin=0):
   # need kgrid info: basis (raxes), unshifted (kvecs0), twists (tvecs)
   axes = wf_h5.get(fp, 'axes')
   raxes = axes_pos.raxes(axes)
-  gvecs0 = wf_h5.get(fp, 'gvectors')
+  gvecs = wf_h5.get(fp, 'gvectors')
   utvecs = wf_h5.get_twists(fp)
   tvecs = np.dot(utvecs, raxes)
-  kvecs0 = np.dot(gvecs0, raxes)
+  kvecs0 = np.dot(gvecs, raxes)
 
   # calculate n(k) at each twist
   kvecsl = []
@@ -108,7 +108,7 @@ def get_det_nk(fp, efermi, ecore=-np.inf, kmax=np.inf, ispin=0):
   for it in range(nt):
     kvecs = kvecs0 + tvecs[it]  # current twist
     # histogram orb^2
-    gvecs, cmat = wf_h5.get_cmat(fp, it, ispin, nstate)
+    cmat = wf_h5.get_cmat(fp, it, ispin, nstate)
     nocc, npw = cmat.shape
     weights = nofk(kvecs, cmat, bands[it], kmax, ecore, efermi)
     # save within a cutoff
