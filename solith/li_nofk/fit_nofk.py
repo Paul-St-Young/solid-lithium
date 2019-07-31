@@ -410,7 +410,6 @@ def show_spline(ax, ux, uym, xleft, xright, smooth=0.0001, **kwargs):
   from scipy.interpolate import splrep, splev
   sel = (xleft<=ux) & (ux<=xright)
   nx = len(ux[sel])
-  print nx
   finex = np.linspace(xleft, xright, 10*nx)
   if nx < 4:  # fit a quadratic
     popt = np.polyfit(ux[sel], uym[sel], 2)
@@ -421,22 +420,34 @@ def show_spline(ax, ux, uym, xleft, xright, smooth=0.0001, **kwargs):
   line = ax.plot(finex, finey, **kwargs)
   return line
 
-def show_slice1d(ax, ux, uym, uye, kfl, **kwargs):
-  ## do NOT use interp1d because it cannot extrapolate
-  #from scipy.interpolate import interp1d
+def show_interp(ax, ux, uym, xleft, xright, kind='linear', **kwargs):
+  from scipy.interpolate import interp1d
+  sel = (xleft<=ux) & (ux<=xright)
+  nx = len(ux[sel])
+  fy = interp1d(ux[sel], uym[sel], kind=kind)
+  finex = np.linspace(xleft, xright, 10*nx)
+  finey = fy(finex)
+  line = ax.plot(finex, finey, **kwargs)
+  return line
+
+def show_slice1d(ax, ux, uym, uye, kfl, kinds=None, **kwargs):
   lines = []
   # set some default errorbar styles
   if ('ls' not in kwargs) and ('linestyle' not in kwargs):
     kwargs['ls'] = ''
+  # set default interpolation style to linear
+  if kinds is None:
+    kinds = ['linear'] * (len(kfl)+1)
   line = ax.errorbar(ux, uym, uye, **kwargs)
   lines.append(line)
   myc = line[0].get_color()
   # spline and connect pieces of the 1D curve
   kleft = min(ux)
-  for kf in kfl+[max(ux)]:
+  for kf, kind in zip(kfl+[max(ux)], kinds):
     ksel = ux<=kf
     kright = max(ux[ksel])
-    line = show_spline(ax, ux, uym, kleft, kright, c=myc)
+    #line = show_spline(ax, ux, uym, kleft, kright, c=myc)
+    line = show_interp(ax, ux, uym, kleft, kright, kind=kind, c=myc)
     xnext = ux[~ksel]
     if len(xnext) > 0:
       kleft = min(xnext)
