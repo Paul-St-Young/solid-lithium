@@ -427,27 +427,30 @@ def show_interp(ax, ux, uym, xleft, xright, kind='linear', **kwargs):
   fy = interp1d(ux[sel], uym[sel], kind=kind)
   finex = np.linspace(xleft, xright, 10*nx)
   finey = fy(finex)
+  kwargs['marker'] = ''
   line = ax.plot(finex, finey, **kwargs)
   return line
 
 def show_slice1d(ax, ux, uym, uye, kfl, kinds=None, **kwargs):
   lines = []
   # set some default errorbar styles
-  if ('ls' not in kwargs) and ('linestyle' not in kwargs):
-    kwargs['ls'] = ''
+  eb_kwargs = kwargs.copy()
+  eb_kwargs['ls'] = ''
   # set default interpolation style to linear
   if kinds is None:
     kinds = ['linear'] * (len(kfl)+1)
-  line = ax.errorbar(ux, uym, uye, **kwargs)
+  line = ax.errorbar(ux, uym, uye, **eb_kwargs)
   lines.append(line)
-  myc = line[0].get_color()
+  if ('c' not in kwargs) and ('color' not in kwargs):
+    myc = line[0].get_color()
+    kwargs['c'] = myc
   # spline and connect pieces of the 1D curve
   kleft = min(ux)
   for kf, kind in zip(kfl+[max(ux)], kinds):
     ksel = ux<=kf
     kright = max(ux[ksel])
-    #line = show_spline(ax, ux, uym, kleft, kright, c=myc)
-    line = show_interp(ax, ux, uym, kleft, kright, kind=kind, c=myc)
+    #line = show_spline(ax, ux, uym, kleft, kright, **kwargs)
+    line = show_interp(ax, ux, uym, kleft, kright, kind=kind, **kwargs)
     xnext = ux[~ksel]
     if len(xnext) > 0:
       kleft = min(xnext)
