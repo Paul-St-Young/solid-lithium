@@ -128,7 +128,7 @@ def get_knk_tgrid(fh5, ymean='nkm', keys=['tgrid', 'raxes', 'gvecs', 'nke']):
 # ================= level 1: isotropic fit =================
 
 
-@sugar.check_file_before
+@sugar.skip_exist_file
 def save_bspline(fyaml, tck):
   """ save Bspline coefficients to file, abort if file exists
 
@@ -184,7 +184,7 @@ def step1d(kmags, kf, jump):
   return stepy
 
 
-@sugar.check_file_before
+@sugar.skip_exist_file
 def save_iso_fit(nk_yml, kf, jump, tck):
   """ save isotropic fit to n(k)
   n(k) = jump * step1d(k-kf) + splev(k, tck)
@@ -405,3 +405,39 @@ def slice1d(phat, kvecs, eps=1e-6):
   kpmags = np.linalg.norm(kperp, axis=-1)
   sel = abs(kpmags) < eps
   return sel
+
+def show_spline(ax, ux, uym, xleft, xright, smooth=0.0001, **kwargs):
+  from scipy.interpolate import splrep, splev
+  sel = (xleft<=ux) & (ux<=xright)
+  nx = len(ux[sel])
+  print nx
+  finex = np.linspace(xleft, xright, 10*nx)
+  if nx < 4:  # fit a quadratic
+    popt = np.polyfit(ux[sel], uym[sel], 2)
+    finey = np.poly1d(popt)(finex)
+  else:
+    tck = splrep(ux[sel], uym[sel], s=smooth)
+    finey = splev(finex, tck)
+  line = ax.plot(finex, finey, **kwargs)
+  return line
+
+def show_slice1d(ax, ux, uym, uye, kfl, **kwargs):
+  ## do NOT use interp1d because it cannot extrapolate
+  #from scipy.interpolate import interp1d
+  lines = []
+  # set some default errorbar styles
+  if ('ls' not in kwargs) and ('linestyle' not in kwargs):
+    kwargs['ls'] = ''
+  line = ax.errorbar(ux, uym, uye, **kwargs)
+  lines.append(line)
+  myc = line[0].get_color()
+  # spline and connect pieces of the 1D curve
+  kleft = min(ux)
+  for kf in kfl+[max(ux)]:
+    ksel = ux<=kf
+    kright = max(ux[ksel])
+    line = show_spline(ax, ux, uym, kleft, kright, c=myc)
+    xnext = ux[~ksel]
+    if len(xnext) > 0:
+      kleft = min(xnext)
+  return lines
