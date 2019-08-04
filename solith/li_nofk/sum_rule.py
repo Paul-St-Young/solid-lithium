@@ -55,3 +55,7 @@ def ntsum_iso3d(uk, unkm, kvol, nke=None):
     tsume = 4*np.pi*np.trapz(0.5*uk**4*nke**2, uk)**0.5/kvol
     return nsum, nsume, tsum, tsume
   return nsum, tsum
+
+def nktail(k, A, Z):
+  nume = (k**2+Z**2)**2
+  return A*(2*Z/nume)**2
