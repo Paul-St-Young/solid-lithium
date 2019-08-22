@@ -64,10 +64,11 @@ def jptail(p, A, Z, kglue, kmax=10., nk=1024):
   from solith.li_nofk.int_nofk import calc_jp1d
   from solith.li_nofk.expt_jofp import flip_and_clamp
   finek = np.linspace(kglue, kmax, nk)
-  finenk = nktail(finek, A, Z)
-  yz = np.zeros(len(p))
-  finex = np.concatenate([p, finek], axis=0)
-  finey = np.concatenate([yz, finenk], axis=0)
+  lsel = p<kglue
+  finex = np.concatenate([p[lsel], finek], axis=0)
+  finey = np.zeros(len(finex))
+  hsel = finex>=kglue
+  finey[hsel] = 2*nktail(finex[hsel], A, Z)
   dy = calc_jp1d(finex, finey)
   fdjp = flip_and_clamp(finex, dy, kind='linear')
   return fdjp(p)
