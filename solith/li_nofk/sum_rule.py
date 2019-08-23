@@ -60,15 +60,9 @@ def nktail(k, A, Z):
   nume = (k**2+Z**2)**2
   return A*(2*Z/nume)**2
 
-def jptail(p, A, Z, kglue, kmax=10., nk=1024):
-  from solith.li_nofk.int_nofk import calc_jp1d
-  from solith.li_nofk.expt_jofp import flip_and_clamp
-  finek = np.linspace(kglue, kmax, nk)
-  lsel = p<kglue
-  finex = np.concatenate([p[lsel], finek], axis=0)
-  finey = np.zeros(len(finex))
-  hsel = finex>=kglue
-  finey[hsel] = 2*nktail(finex[hsel], A, Z)
-  dy = calc_jp1d(finex, finey)
-  fdjp = flip_and_clamp(finex, dy, kind='linear')
-  return fdjp(p)
+def jptail(p, A, Z, kglue):
+  jpt = np.zeros(len(p))
+  hsel = p>=kglue
+  jpt[hsel] = 2*A*Z**2/(3*(p[hsel]**2+Z**2)**3) * 2*np.pi * 2 #/kvol
+  jpt[~hsel] = max(jpt)
+  return jpt
