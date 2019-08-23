@@ -58,7 +58,7 @@ def ntsum_iso3d(uk, unkm, kvol, nke=None):
 
 def nktail(k, A, Z):
   nume = (k**2+Z**2)**2
-  return A*(2*Z/nume)**2
+  return 2*A*(2*Z/nume)**2
 
 def jptail(p, A, Z, kglue):
   jpt = np.zeros(len(p))
