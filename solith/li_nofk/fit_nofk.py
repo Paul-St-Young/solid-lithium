@@ -420,6 +420,11 @@ def show_spline(ax, ux, uym, xleft, xright, smooth=0.0001, **kwargs):
   line = ax.plot(finex, finey, **kwargs)
   return line
 
+def show_data(ax, efunc, ux, uym, uye, xleft, xright, **kwargs):
+  sel = (xleft<=ux) & (ux<=xright)
+  line = efunc(ax, ux[sel], uym[sel], uye[sel], **kwargs)
+  return line
+
 def show_interp(ax, ux, uym, xleft, xright, kind='linear', **kwargs):
   from scipy.interpolate import interp1d
   sel = (xleft<=ux) & (ux<=xright)
@@ -431,7 +436,9 @@ def show_interp(ax, ux, uym, xleft, xright, kind='linear', **kwargs):
   line = ax.plot(finex, finey, **kwargs)
   return line
 
-def show_slice1d(ax, ux, uym, uye, kfl, kinds=None, **kwargs):
+def show_slice1d(ax, ux, uym, uye, kfl, kinds=None, efunc=None, **kwargs):
+  if ('c' not in kwargs) and ('color' not in kwargs):
+    raise RuntimeError('color must be specified')
   lines = []
   # set some default errorbar styles
   eb_kwargs = kwargs.copy()
@@ -439,18 +446,19 @@ def show_slice1d(ax, ux, uym, uye, kfl, kinds=None, **kwargs):
   # set default interpolation style to linear
   if kinds is None:
     kinds = ['linear'] * (len(kfl)+1)
-  line = ax.errorbar(ux, uym, uye, **eb_kwargs)
-  lines.append(line)
-  if ('c' not in kwargs) and ('color' not in kwargs):
-    myc = line[0].get_color()
-    kwargs['c'] = myc
+  if efunc is None:
+    def efunc(ax, *args, **kwargs):
+      return ax.errorbar(*args, **kwargs)
   # spline and connect pieces of the 1D curve
   kleft = min(ux)
   for kf, kind in zip(kfl+[max(ux)], kinds):
     ksel = ux<=kf
     kright = max(ux[ksel])
+    line0 = show_data(ax, efunc, ux, uym, uye, kleft, kright, **eb_kwargs)
+    lines.append(line0)
     #line = show_spline(ax, ux, uym, kleft, kright, **kwargs)
     line = show_interp(ax, ux, uym, kleft, kright, kind=kind, **kwargs)
+    lines.append(line)
     xnext = ux[~ksel]
     if len(xnext) > 0:
       kleft = min(xnext)
