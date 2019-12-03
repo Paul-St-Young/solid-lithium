@@ -62,7 +62,7 @@ def nktail(k, A, Z):
 
 def jptail(p, A, Z, kglue):
   jpt = np.zeros(len(p))
-  hsel = p>=kglue
+  hsel = abs(p)>=kglue
   def tail(x, A, Z):
     return  2*A*Z**2/(3*(x**2+Z**2)**3) * 2*np.pi * 2 #/kvol
   jpt[hsel] = tail(p[hsel], A, Z)
