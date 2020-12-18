@@ -1,6 +1,6 @@
 import yaml
 import numpy as np
-from qharv.plantation import sugar
+from qharv.field import sugar
 
 # Fermi k vector magnitude of homogeneous electron gas (heg) at density rs
 heg_kfermi = lambda rs:((9*np.pi)/(4.*rs**3.))**(1./3)
@@ -114,7 +114,11 @@ def get_knk(fh5, ymean='nkm'):
   fp.close()
   return kvecs, nkm
 
-def get_knk_tgrid(fh5, ymean='nkm', keys=['tgrid', 'raxes', 'gvecs', 'nke']):
+def get_knk_tgrid(fh5, ymean='nkm', keys=None, no_error=False):
+  if keys is None:
+    keys = ['tgrid', 'raxes', 'gvecs', 'nke']
+  if no_error:
+    keys.pop(keys.index('nke'))
   import h5py
   data = {}
   fp = h5py.File(fh5, 'r')
