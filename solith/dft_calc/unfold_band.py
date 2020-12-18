@@ -157,8 +157,8 @@ def unfold1(gvecs1, nkm1, nscf_out, pbc, show_progress=True):
   rnkm = np.zeros(len(rgvecs))
   filled = np.zeros(len(rgvecs), dtype=bool)
   if show_progress:
-    from progressbar import ProgressBar
-    bar = ProgressBar(maxval=len(symops))
+    from qharv.field import sugar
+    bar = sugar.get_progress_bar(len(symops))
   for isym, so in enumerate(symops):
     mat = np.array(so['mat'], dtype=int)
     for ig, gv in enumerate(gvecs1):  # unfold existing data
@@ -175,7 +175,8 @@ def unfold1(gvecs1, nkm1, nscf_out, pbc, show_progress=True):
       if not filled[idx]:
         rnkm[idx] = nkm1[ig]
         filled[idx] = True
-    bar.update(isym)
+    if show_progress:
+      bar.update(isym)
   return rgvecs[filled], rnkm[filled]
 
 def unfold_idx(gvecs1, mats, pbc):
